@@ -1,4 +1,4 @@
-from exceptions import OutOfBoundsException
+from exceptions_custom import OutOfBoundsException
 
 class ArrayList:
 
