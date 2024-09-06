@@ -3,4 +3,4 @@ class OutOfBoundsException(Exception):
     
     def __init__(self, index):
         self.message = f"Index '{index}' is out of bounds."
-        super().__init__(self.message)
+        super().__init__(self.message) 
