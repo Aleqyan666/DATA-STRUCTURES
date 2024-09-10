@@ -86,3 +86,5 @@ class LinkedList:
           size +=1
           current = current.next
        return size
+    
+    
