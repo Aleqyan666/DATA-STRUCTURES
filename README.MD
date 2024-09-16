@@ -16,11 +16,17 @@ This repository is a comprehensive collection of data structures, algorithms, an
 - **/exceptions_custom:** 
     - The `exceptions/` folder contains custom exception classes for handling specific error cases in this project, improving error management and clarity in the code
 
-- **/list_implementations:**
+- **/list_impl:**
      - The `list_implementations/` folder contains Python modules for managing list operations, including sorting, filtering, searching, and transforming lists for efficient data handling.
 
+- **/list_impl:**
+     - The `list_implementations/` folder contains Python modules for managing stack operations, including pushing, popping, peeking, and traversing stacks, ensuring efficient data management and manipulation.
+
+- **/iterators:** 
+    - The `iterators/` folder  implements the iterator design pattern, offering various iterator solutions with distinct implementations. It also includes custom exception classes to handle specific errors, enhancing error management and code clarity.
+  
 ## Contacts
 
 [Github Account](https://github.com/Aleqyan666)    
 [LinkedIn Account](https://www.linkedin.com/inhayk-alekyan-900797204/)
-
+ 
