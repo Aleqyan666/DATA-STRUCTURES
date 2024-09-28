@@ -615,7 +615,89 @@ class LinkedListBasedStack(Stack):
             return data
 
 
+class Queue(Collection):
+    @abstractmethod
+    def enqueue(self, e: object) -> None:
+        """Add an element to the end of the queue."""
+        pass
 
+    @abstractmethod
+    def dequeue(self) -> object:
+        """Remove and return the front element."""
+        pass
+
+    @abstractmethod
+    def front(self) -> object:
+        """Return the front element without removing it."""
+        pass
+
+class LinkedListBasedQueue(Queue):
+    class _Node:
+        def __init__(self, data, next=None):
+          self._data = data
+          self._next = next
+
+    def __init__(self):
+      self._first = None
+      self._last = None
+      self._size = 0
+
+    def enqueue(self, e: object) -> None:
+        """Add an element to the end of the queue."""
+        new_node = LinkedListBasedQueue._Node(e)
+
+        if self._size == 0:
+            self._first = self._last = new_node
+        else:
+            self._last._next = new_node
+            self._last = new_node
+        self._size += 1
+
+    def dequeue(self) -> object:
+        """Remove and return the front element."""
+        if self._first is None or self._size == 0:
+            return None
+        
+        temp = self._first
+        self._first = self._first._next
+        self._size -= 1
+        return temp
+        
+
+    def remove(self, e):
+        if self._size == 0:
+            return False
+
+        temp = self._first
+
+        
+        if temp._data == e:
+            self.dequeue()
+            return True  
+
+        while temp and temp._next:
+            if temp._next._data == e:
+                if temp._next == self._last:
+                    self._last = temp
+                temp._next = temp._next._next
+                self._size -= 1
+                return True  
+            
+            temp = temp._next
+
+        return False  
+
+
+
+
+    def get_first(self) -> object:
+        """Return the front element without removing it."""
+        return self._first
+    
+    
+    def get_last(self) -> object:
+        """Return the front element without removing it."""
+        return self._last
 
 
 # Odd position iterator for linkedList
