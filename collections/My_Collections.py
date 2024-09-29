@@ -114,7 +114,7 @@ class LinkedList(List):
             self.current_node = self.current_node.next
             self.ind += 1  
             return temp
-              
+
     def odd_position_iterator(self):
             return LinkedList.LinkedListOddPositionIterator(self._first)
 
@@ -425,9 +425,17 @@ class ArrayList(List):
         self._arr = new_arr
     
     def reverse(self):
-        for i in range(self._size):
-            self._arr[i], self._arr[self._size - i - 1] = \
-                self._arr[self._size - i -1], self._arr[i]
+        for i in range(self._size // 2):
+            self._arr[i], self._arr[self._size - i - 1] = self._arr[self._size - i - 1], self._arr[i]
+
+    def reverse_rec(self, index=0):
+        if self._size == 0:
+            return 
+        if index >= (self._size // 2):
+            return
+        self._arr[index], self._arr[self._size - index - 1] = self._arr[self._size - index - 1], self._arr[index]
+        self.reverse_rec(index + 1)
+
             
     def add_from_back(self, e):
         if self._size == len(self._arr):
