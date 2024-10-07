@@ -779,11 +779,26 @@ class LinkedList(ListADT):
 
 
 class DoubleLinkedList(ListADT):
+    class _DataWrapper:
+        def __init__(self, data, next=None, prev=None):
+            self.data = data
+            self.next = next
+            self.prev = prev
+
+    def __init__(self):
+        super().__init__()
+        self._first = None
+        self._last = None
+
     def first(self) -> object:
-        pass
+        if self._first is None:
+            return None
+        return self._first
 
     def last(self) -> object:
-        pass
+        if self._last is None:
+            return
+        return self._last
 
     def get_element_at(self, index) -> object:
         pass
@@ -833,13 +848,4 @@ class DoubleLinkedList(ListADT):
     def clear(self) -> None:
         pass
 
-    class _DataWrapper:
-        def __init__(self, data, next=None, prev=None):
-            self.data = data
-            self.next = next
-            self.prev = prev
-
-    def __init__(self):
-        super().__init__()
-        self._first = None
-        self._last = None
+    

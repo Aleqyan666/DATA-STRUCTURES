@@ -67,9 +67,9 @@ class Stack(Collection):
     def top() -> object:
         pass
 
+    
 class MyStack(Stack):
     def push(e: object) -> None:
-        #!
         pass
 
     def pop() -> object:
@@ -91,6 +91,41 @@ class LinkedList(List):
         self._first = None
         self._last = None
 
+    def sort_list(self):
+
+        c0,  c1, c2 = 0
+        if self._first is None:
+           return None
+        if self._size == 0 or self._size == 1:
+            return None 
+
+        current = self._first
+        while current:
+            if current.data == 0:
+               c0 += 1
+            if current.data == 1:
+               c1 += 1
+            if current.data == 2:
+               c2 += 1
+            current = current.next    
+        
+        self._first = self._last = None
+        self._size = 0
+
+        while c1 > 0:
+            self.add_first(1)
+            c1 -= 1
+
+        while c0 > 0:
+            self.add_first(0)
+            c0 -= 1
+
+        while c2 > 0:
+            self.add_last(2)
+            c2 -= 1     
+
+            
+
     class LinkedListOddPositionIterator:
         def __init__(self, start_node):
           self.current_node = start_node
@@ -106,9 +141,6 @@ class LinkedList(List):
             if self.ind % 2 == 0:  
                 self.current_node = self.current_node.next
                 self.ind += 1
-
-            if self.current_node is None:  
-                raise StopIteration
 
             temp = self.current_node.data
             self.current_node = self.current_node.next
@@ -221,6 +253,28 @@ class LinkedList(List):
     def size(self) -> int:
         return self._size
 
+    # Implement a method find_middle() that returns the middle node of the linked list.
+    #  If the list has an even number of nodes, return the second middle node.
+    def middle_node(self):
+        if self._size == 0:
+            return
+        
+        if self._size == 1:
+            return self._first
+    
+        if self._size == 2:
+            return self._last
+
+        slow = self._first
+        fast = self._first
+
+        while fast:
+            slow = slow.next
+            fast = fast.next.next
+
+        return slow
+
+    
 #     Implement both a recursive and 
 # an iterative add_before(el: object, n: object) method for
 #  the LinkedList class. These methods should add the n
@@ -271,6 +325,10 @@ class LinkedList(List):
         if current.next is not None:
             self.recursive_add_before(el, new, current.next)
 
+    def reverse(self):
+        pass
+
+    
 
 #     Implement both a recursive and an iterative add_after(el: object, n:
 # object) method for the LinkedListStack class. These methods should add
@@ -327,11 +385,76 @@ class DoubleLinkedList(List):
       self._first = None
       self._last = None
 
+    class ForwardIterator:
+        def __init__(self, start_node):
+            self.current_node = start_node
+
+        def __iter__(self):
+          return self
+        
+        def __next__(self):
+            if self.current_node is None:
+                raise StopIteration
+            temp = self.current_node.data
+            self.current_node = self.current_node.next
+            return temp
+        
+    class BackwardIterator:
+        def __init__(self, last_node):
+            self.current_node = last_node
+
+        def __next__(self):
+            if self.current_node is None:
+              raise StopIteration
+            temp = self.current_node.data
+            self.current_node = self.current_node.prev
+            return temp
+
+        def __iter__(self):
+          return self
+        
+    class SkipIterator:
+        def __init__(self, start_node, step: int):
+            if step < 1:
+                raise ValueError
+            self.current_node = start_node
+            self.step = step
+
+        def __iter__(self):
+            return self
+        
+        def __next__(self):
+            if self.current_node is None:
+                raise StopIteration
+            temp = self.current_node.data
+            i = 0
+            while i < self.step and self.current_node.next is not None:
+                self.current_node = self.current_node.next
+                i += 1
+            return temp
+            
+    class CircularIterator:
+        def __init__(self, start_node):
+            self.current_node = start_node
+            self.first_node = start_node
+
+        def __iter__(self):
+            return self
+        
+        def __next__(self):
+            if self.current_node is None:
+                raise StopIteration
+            temp = self.current_node.data
+            if self.current_node.next is None:
+                self.current_node = self.first_node
+            else:
+                self.current_node = self.current_node.next
+            return temp
+
     def add_first(self, e) -> None:
-        new_node = LinkedList.Node(e)
+        new_node = DoubleLinkedList.Node(e)
         if self._size == 0:
-            self._first = new_node
-            self._last = new_node
+            self._first = self._last = new_node
         else:
             new_node.next = self._first
             self._first.prev = new_node
@@ -339,15 +462,15 @@ class DoubleLinkedList(List):
         self._size += 1
 
     def add_last(self, e: object) -> None:
-        new_node = LinkedList.Node(e)
+        new_node = DoubleLinkedList.Node(e)
         if self._size == 0:
-            self._first = new_node
-            self._last = new_node
+            self._first = self._last = new_node
         else:
             new_node.prev = self._last
             self._last.next = new_node
             self._last = new_node
         self._size += 1
+
 
     def remove_first(self) -> bool:
         if self._size == 0:
@@ -361,7 +484,7 @@ class DoubleLinkedList(List):
             self._first.prev = None
         self._size -= 1
         return True
-
+    
     def remove_last(self) -> bool:
         if self._size == 0:
             return False
@@ -383,6 +506,31 @@ class DoubleLinkedList(List):
         if self._last is not None:
             return self._last.data
         return None
+    
+    def add_after(self, el: object, new: object):
+        new_node = DoubleLinkedList.Node(new)
+    
+        if self._size == 0:
+            self._first = self._last = new_node
+        else:
+            current = self._first
+            
+            while current:
+                if current.data == el:
+                    new_node.prev = current
+                    new_node.next = current.next
+                    
+                    if current.next is not None:
+                        current.next.prev = new_node
+                    else:
+                        self._last = new_node
+                    
+                    current.next = new_node
+                    break
+                
+                current = current.next   
+        self._size += 1
+
 
 class ArrayList(List):
     def __init__(self, capacity=10):
@@ -486,6 +634,26 @@ class ArrayList(List):
             return None
         return self._arr[index]
     
+#     Implement reorder()->None instance method for ArrayList class which reorders the elements
+# [a1, a2, a3, a4, …., an-2, an-1, an] in place to [a1, an, a2, an-1, a3, an-2, …].
+    def reorder(self) -> None:
+        if self._size <= 1:
+            return None
+        
+        for i in range(1, self._size):
+            self.add_at(i, self._arr[self._size - i])
+
+    
+
+    def add_at(self, index, e):
+        if index > self._size or index < 0:
+            return None
+        
+        for i in range(self._size - 1, index, -1):
+            self._arr[i + 1] = self._arr[i]
+        self._arr[index] = e
+        self._size += 1
+
 #     Implement find_max_consecutive_ones() instance method for the
 # ArrayList class that returns the maximum
 #  number of consecutive 1's in the array.
@@ -503,8 +671,7 @@ class ArrayList(List):
                 count = 0
         return answer
     
-    def add_at(self, index, e):
-        pass
+   
 
     def add_first(self, e):
         pass
@@ -562,7 +729,62 @@ class LinkedListBasedStack(Stack):
         if self._size == 0:
             return None
         return self._top.data
+    
+    def contains(self, el) -> bool:
+        if self._size == 0:
+            return False
+        
+        current = self._top
+        while current:
+            if current.data == el:
+                return True
+            else:
+                current = current.next
+        
+        return False
+    
+    #  that removes the first occurrence of a specified element from the stack.
+    #  If the element is not found, do nothing.
+    def remove(self, el: object):
+        if self._size == 0:
+            return
+        
+        previous = None
+        current = self._top
+        while current:
+            if current == el:
+                if previous is None:
+                    self._top = current.next
+                else:
+                    previous.next = current.next
+                self._size -= 1
 
+            previous = current
+            current = current.next
+
+
+    # that returns the number of times a specified element appears in the stack.
+    def count(self, el: object):
+        if self._size == 0:
+            return 0
+        
+        count = 0
+        current = self._top
+        while current:
+            if current.data == el:
+                count += 1
+            current = current.next
+
+        return count
+                    
+    # that swaps the top two elements of the stack. 
+    # If the stack has fewer than two elements, do nothing.
+    def swap(self):
+        if self._size < 2:
+            return
+        
+        self._top.data, self._top.next.data = self._top.next.data, self._top.data
+    
     def add_after(self, el: object, new: object):
         if self._size == 0 or self._top is None:
             return
@@ -591,19 +813,29 @@ class LinkedListBasedStack(Stack):
             new_node.next = current.next
             current.next = new_node
             self._size += 1
+            return
         
         self.add_after_recursive(el, new, current.next)
 
-
     
     def empty(self) -> None:
-        pass
+        while self._size != 0:
+            self.pop()
     
     def is_empty(self) -> bool:
-        pass
+        return self._size == 0
 
     def size(self) -> int:
-        pass
+        return self._size
+    
+    def display(self):
+        if self._size == 0:
+            return 
+        current = self._top
+        while current:
+            print(current.data)
+            current = current.next
+            
 
     def __iter__(self):
         return self.LinkedListBasedStackForwardIterator(self._top)
@@ -707,6 +939,14 @@ class LinkedListBasedQueue(Queue):
         """Return the front element without removing it."""
         return self._last
 
+# Implement a recursive function remove_even_items(s: StackADT) -> int (not within any class
+# scope) that removes even items from a stack of integer objects and returns the count of removed items.
+# The function should only use the public interface of the Stack (methods like push, pop, and is_empty),
+# without accessing private or protected instance properties of the stack object. (
+# !def remove_even_items(s: Stack):
+#  !   fin_stack = Stack()
+#   !  while not s.is_empty():
+#    !     if fin_stack[]
 
 # Odd position iterator for linkedList
 # llist = LinkedList()
