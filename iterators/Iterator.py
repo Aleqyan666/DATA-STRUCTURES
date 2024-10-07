@@ -4,7 +4,7 @@ class InfiniteCounter:
 
     def __next__(self):
       current_value = self.current
-      current_value += 1
+      self.current += 1
       return current_value
     
     def __iter__(self):
