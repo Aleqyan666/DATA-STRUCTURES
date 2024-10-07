@@ -14,17 +14,32 @@ This repository is a comprehensive collection of data structures, algorithms, an
 ---
 
 - **/exceptions_custom:** 
-    - The `exceptions/` folder contains custom exception classes for handling specific error cases in this project, improving error management and clarity in the code
+    - The `exceptions/` package contains custom exception classes for handling specific error cases in this project, improving error management and clarity in the code
 
 - **/list_impl:**
-     - The `list_implementations/` folder contains Python modules for managing list operations, including sorting, filtering, searching, and transforming lists for efficient data handling.
+     - The `list_implementations/` package contains Python modules for managing list operations, including sorting, filtering, searching, and transforming lists for efficient data handling.
 
-- **/list_impl:**
-     - The `list_implementations/` folder contains Python modules for managing stack operations, including pushing, popping, peeking, and traversing stacks, ensuring efficient data management and manipulation.
+- **/stack_impl:**
+     - The `list_implementations/` package contains Python modules for managing stack operations, including pushing, popping, peeking, and traversing stacks, ensuring efficient data management and manipulation.
 
 - **/iterators:** 
-    - The `iterators/` folder  implements the iterator design pattern, offering various iterator solutions with distinct implementations. It also includes custom exception classes to handle specific errors, enhancing error management and code clarity.
+    - The `iterators/` package  implements the iterator design pattern, offering various iterator solutions with distinct implementations. It also includes custom exception classes to handle specific errors, enhancing error management and code clarity.
   
+- **/collections:**
+    - The `collections/` package contains implementations of common data structures such as arrays, linked lists, queues, stacks, and others. It provides    efficient and reusable solutions for data organization and manipulation, serving as the foundation for many algorithms and applications.
+    - 
+- **recursion:**
+    - The `recursion/` package includes exercises and solutions that apply the recursive problem-solving approach. It offers a variety of recursive implementations, helping to deepen understanding of recursion through practical examples and challenges.
+
+- **sorting_algorithms:**
+    - The `sorting_algorithms/` package contains a variety of sorting algorithm implementations. It provides exercises and solutions designed to enhance understanding of sorting techniques and their complexities, along with practical examples and challenges for hands-on practice.
+
+
+
+
+
+
+
 ## Contacts
 
 [Github Account](https://github.com/Aleqyan666)    
