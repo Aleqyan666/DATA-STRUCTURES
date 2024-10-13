@@ -91,6 +91,37 @@ class LinkedList(List):
         self._first = None
         self._last = None
 
+
+    class StepIterator:
+        def __init__(self, step: int , start_node):
+            if step <= 0:
+                raise ValueError
+            self.step = step
+            self.current_node = start_node
+
+        def __iter__(self):
+            return self
+
+        def __next__(self):
+            temp = self.current_node.data
+            i = 0
+            while i < self.step:
+                if self.current_node is None:
+                    raise StopIteration
+                self.current_node = self.current_node.next
+                i += 1
+            return temp
+
+    # Default iterator, 1-step iteration
+    def __iter__(self):
+        return self.StepIterator(1, self._first)
+
+    def step_iterator(self, step):
+        return self.StepIterator(step, self._first)
+
+    
+    # Given a list consisting only of 0s, 1s, and 2s, sort it so
+    #  that all the 0s come first, followed by all the 1s, and then all the 2s.
     def sort_list(self):
 
         c0,  c1, c2 = 0
@@ -300,14 +331,47 @@ class LinkedList(List):
                 return
             current = current.next
 
+
+    def insert_before_max(self, el):
+        new_node = LinkedList.Node(el)
+        if self._size == 0:
+            self._first = self._last = new_node
+            self._size += 1
+            return
+
+        max = self._first.data
+        current = self._first
         
+        while current:
+            if current.data > max:
+                max = current.data
+            current = current.next
+        
+        if self._first.data == max:
+            new_node.next = self._first
+            self._first = new_node
+            self._size += 1 
+            return
+
+        previous = None
+        curr = self._first
+        while curr:
+            if curr.data == max:
+                new_node.next = curr
+                previous.next = new_node
+                self._size += 1
+                break
+            curr = curr.next
+            previous = previous.next
+        
+
     
-    def recursive_add_before(self, el: object, new: object, current=None): #!DO IT AGAIN MYSELF
+    def recursive_add_before(self, el: object, new: object, current=None):
         if self._first is None or self._size == 0:
             return
         
-        if self._first == el and self._size == 1:
-            new_node = LinkedList.Node(el)
+        if self._first.data == el and self._size == 1:
+            new_node = LinkedList.Node(new)
             new_node.next = self._first
             self._first = new_node
             self._size += 1
@@ -316,8 +380,8 @@ class LinkedList(List):
         if current is None:
             current = self._first
 
-        if current.next ==  el:
-            new_node =  LinkedList.Node(el)
+        if current.next and current.next.data ==  el:
+            new_node =  LinkedList.Node(new)
             new_node.next = current.next
             current.next = new_node
             self._size += 1
@@ -325,11 +389,52 @@ class LinkedList(List):
         if current.next is not None:
             self.recursive_add_before(el, new, current.next)
 
+# Recursive Node Deletion by Value
+# Develop a recursive function that removes the first occurrence of a node with a specified value.
+# Objective: Implement a function that recursively finds and deletes a node with a given value.
+    def recursive_remove_by_value_v2(self, el: object, current=None, previous=None):
+        if self._size == 0:
+            return None
+        
+        if current is None:
+            current = self._first
+                    
+        if current.data == el:
+            if previous is None:
+                self._first = self._first.next
+            else:
+                previous.next = current.next
+            self._size -= 1
+            return
+        self.recursive_remove_by_value2(el, current.next, current)
+
+    # Recursive Node Deletion by Value: using heper function
+    def recursive_remove_by_value(self, el: object):
+
+        def _recursive_remove_helper(current: LinkedList.Node, previous: LinkedList.Node):
+            # Checking if the list is empty
+            if current is None:
+                return None
+            # Check if we have found the element
+            if current.data == el:
+                # If the found element is the first one             
+                if previous is None:
+                    self._first = self._first.next
+                else:
+                    previous.next = current.next
+                self._size -= 1
+                return
+            # Recursive call, if we don't find the exact node
+            _recursive_remove_helper(current.next, current)
+        # Initiating recursing call from the head: the first Node
+        _recursive_remove_helper(self._first, None)
+                
+    
     def reverse(self):
+        #!INCOMPLETE
         pass
 
     
-
 #     Implement both a recursive and an iterative add_after(el: object, n:
 # object) method for the LinkedListStack class. These methods should add
 # the n object to the LinkedListStack after the first occurrence of the el object.
@@ -343,16 +448,31 @@ class LinkedList(List):
             if current.data == el:
                 new_node = LinkedList.Node(new)
                 new_node.next = current.next
-                current.next = current.next
+                current.next = new_node
                 self._size += 1
                 break
 
             current = current.next
 
 
-    def recursive_add_after(self, el: object, new: object):
-        #!
-        pass
+    def recursive_add_after(self, el: object, new: object, current=None):
+        if self._size == 0:
+            return
+
+        if current is None:
+            current = self._first
+
+        if current.data == el:
+            new_node = LinkedList.Node(new)
+            new_node.next = current.next
+            current.next = new_node
+            self._size += 1
+            return
+        
+        if current.next is None:
+            return
+
+        self.recursive_add_after(el, new, current.next)
 
 
     class LinkedListForwardIterator:
@@ -372,7 +492,37 @@ class LinkedList(List):
     def __iter__(self):
       return LinkedList.LinkedListForwardIterator(self._first)
       
+
+#     Implement a recursive remove_at(el: object, index: int) instance method for
+# SingleLinkedList class which removes the element at given position. The method should throw a
+# ValueError exception in case if the index is out of boundaries. Index valid values are from 0 to size - 1.
+# Please note that a static private recursive helper method should be implemented for this task. It receives
+# a Node type object to implement the recursion. We define the helper method as static, to operate only
+# with nodes inside of it (this method does not have access to list self properties or methods).
+    def remove_at(self, index: int):
+        if index >= self._size:
+            raise ValueError
+        
+        def _remove_at_helper(current: LinkedList.Node, previous: LinkedList.Node, i=0):
+            if current is None:
+                return None
+            
+            if i == index:          
+                if previous is None:
+                    previous = self._first
+                else:
+                    previous.next = current.next
+                self._size -= 1
+                return
+            
+            _remove_at_helper(current.next, current, i + 1)
+
+        _remove_at_helper(self._first, None)        
+
     
+                
+    
+
 class DoubleLinkedList(List):
     class Node:
         def __init__(self, data, next=None, prev=None):
@@ -384,6 +534,7 @@ class DoubleLinkedList(List):
       self._size = 0
       self._first = None
       self._last = None
+
 
     class ForwardIterator:
         def __init__(self, start_node):
@@ -399,20 +550,36 @@ class DoubleLinkedList(List):
             self.current_node = self.current_node.next
             return temp
         
-    class BackwardIterator:
+
+    # class BackwardIterator:
+    #     def __init__(self, last_node):
+    #         self.current_node = last_node
+
+    #     def __next__(self):
+    #         if self.current_node is None:
+    #           raise StopIteration
+    #         temp = self.current_node.data
+    #         self.current_node = self.current_node.prev
+    #         return temp
+
+    #     def __iter__(self):
+    #       return self
+
+    class BackIterator:
         def __init__(self, last_node):
             self.current_node = last_node
 
-        def __next__(self):
-            if self.current_node is None:
-              raise StopIteration
-            temp = self.current_node.data
-            self.current_node = self.current_node.prev
-            return temp
-
         def __iter__(self):
-          return self
+            return self
         
+        def __next__(self):
+          if self.current_node is None:
+              raise StopIteration
+          temp = self.current_node.data
+          self.current_node = self.current_node.prev
+          return temp
+        
+
     class SkipIterator:
         def __init__(self, start_node, step: int):
             if step < 1:
@@ -451,6 +618,7 @@ class DoubleLinkedList(List):
                 self.current_node = self.current_node.next
             return temp
 
+
     def add_first(self, e) -> None:
         new_node = DoubleLinkedList.Node(e)
         if self._size == 0:
@@ -461,6 +629,7 @@ class DoubleLinkedList(List):
             self._first = new_node
         self._size += 1
 
+
     def add_last(self, e: object) -> None:
         new_node = DoubleLinkedList.Node(e)
         if self._size == 0:
@@ -470,7 +639,7 @@ class DoubleLinkedList(List):
             self._last.next = new_node
             self._last = new_node
         self._size += 1
-
+ 
 
     def remove_first(self) -> bool:
         if self._size == 0:
@@ -572,6 +741,45 @@ class ArrayList(List):
             new_arr[i] = self._arr[i]
         self._arr = new_arr
     
+    # O(n) complexity  for
+    # finding minimum and maximum elements
+    def get_minimum(self): # O(n) complexity
+        if self._size == 0:
+            return None
+
+        min = self._arr[0]
+        for i in range(1, self._size):
+            if self._arr[i] < min:
+                min = self._arr[i]
+        return min
+
+    def get_maximum(self): # O(n) complexity
+        if self._size == 0:
+            return None
+
+        max = self._arr[0]
+        for i in range(1, self._size):
+            if max < self._arr[i]:
+                max = self._arr[i]
+        return max
+
+    def insert_before_max(self, el):
+        if self._size == 0:
+            self._arr[0] = el
+            self._size += 1
+            return
+        
+        max = self._arr[0]
+        ind = 0
+        for i in range(1, self._size):
+            if self._arr[i] > max:
+                max, ind = self._arr[i], i
+        
+        for j in range(self._size, ind, - 1):
+            self._arr[j] = self._arr[j - 1]
+        self._arr[ind] = el
+        self._size += 1
+
     def reverse(self):
         for i in range(self._size // 2):
             self._arr[i], self._arr[self._size - i - 1] = self._arr[self._size - i - 1], self._arr[i]
@@ -752,16 +960,17 @@ class LinkedListBasedStack(Stack):
         previous = None
         current = self._top
         while current:
-            if current == el:
+            if current.data == el:
                 if previous is None:
-                    self._top = current.next
+                    self._top = self._top.next
                 else:
                     previous.next = current.next
                 self._size -= 1
+                break
 
             previous = current
             current = current.next
-
+                
 
     # that returns the number of times a specified element appears in the stack.
     def count(self, el: object):
@@ -993,3 +1202,114 @@ class LinkedListBasedQueue(Queue):
 # except StopIteration:
 #     pass
 
+# Implement a recursive function remove_even_items(s: StackADT) -> int (not within any class
+# scope) that removes even items from a stack of integer objects and returns the count of removed items.
+# The function should only use the public interface of the Stack (methods like push, pop, and is_empty),
+# without accessing private or protected instance properties of the stack object
+def remove_even_items(s: Stack) -> int:
+    if s.is_empty():
+        return "Empty Stack"
+    
+    t = s.pop()
+
+    count = remove_even_items(s)
+
+    if t % 2 == 0:
+        return count + 1
+    else: 
+        s.push(t)
+        return count
+    
+# Implement a recursive remove_after(s: Stack, el: object) function (not in any class scope)
+# which removes the element after the first occurrence of the el. If the stack is empty, raise Exception. If el
+# is not in the Stack, raise Exception. If el is the bottom element, raise Exception. Note that no helper
+# function should be used to implement the recursion. The function should do the implementation using
+# Stack public interface only (you can not access private and protected instance properties of the stack
+# object). 
+def remove_after(s: Stack, el: object):
+    if s.is_empty():
+        raise Exception
+
+    t = s.pop()
+
+    if t == el:
+        if s.is_empty():
+            raise Exception
+        else:
+            s.pop()
+        return
+    
+    remove_after(s, el)
+
+    s.push(t)
+
+#  Write a recursive function remove_all(s: Stack, el: object) that removes all occurrences
+#  of the element el from the stack s. After removing all occurrences, 
+# the stack should remain in its original order (except without el).
+def remove_all_occurences(s: Stack, el: object):
+    if s.is_empty():
+        return
+
+    t = s.pop()      
+
+    remove_all_occurences(s, el)
+
+    if t != el:
+        s.push(t)
+
+#W rite a recursive function remove_not_divisible(s: Stack, n: int) 
+# that removes all elements from the stack that are not divisible by n.
+def remove_not_divisible(s: Stack, n: int):
+    if s.is_empty():
+        return
+
+    t = s.pop()
+
+    remove_not_divisible(s, n)
+
+    if t % n == 0:
+        s.push(t)
+
+# Counts the number of elements in the stack `s` that are greater than the specified number `n`.
+def count_greater_than(s: Stack, n: int) -> int:
+    if s.is_empty():
+        return
+
+    t = s.pop()
+
+    count = count_greater_than(s, n)
+
+    if t > n:
+        count += 1
+    
+    s.push(t)
+
+    return count
+
+# Write a recursive function count_even(s: Stack) -> int that returns the count of even elements in the stack.
+def count_even(s: Stack) -> int:
+    if s.is_empty():
+        return 
+
+    t = s.pop()
+
+    count = count_even(s)
+
+    if t % 2 == 0:
+        count += 1
+
+    s.push(t)
+
+    return count
+
+# Write a recursive function remove_even(s: Stack) that removes all even elements from the stack.
+def remove_even(s: Stack):
+    if s.is_empty():
+        return
+
+    t = s.pop()
+
+    remove_even(s)
+
+    if t % 2 != 0:
+        s.push(t)
