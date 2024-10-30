@@ -9,6 +9,7 @@ def bubble_sort(l: list):
                 swapped = True
         if not swapped:
             break
+    return l
 
 # bl = [2,5,6,8,9,4,2,7]
 # bubble_sort(bl)
@@ -25,6 +26,7 @@ def insertion_sort(l: list):
             l[j + 1] = l[j]
             j -= 1
         l[j + 1] = key
+    return l
 
 # ins_list = [5,6,2,7,1,4,8]
 # insertion_sort(il)
@@ -40,6 +42,7 @@ def selection_sort(l: list):
         for j in range(i + 1, len(l)):
             if l[j] < l[min_index]:
                 l[j], l[min_index] = l[min_index], l[j]
+    return l
 
 # sl = [5,6,2,7,1,4,8]
 # selection_sort(sl)
