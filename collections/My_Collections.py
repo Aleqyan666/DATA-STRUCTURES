@@ -91,7 +91,7 @@ class LinkedList(List):
         self._first = None
         self._last = None
 
-
+    
     class StepIterator:
         def __init__(self, step: int , start_node):
             if step <= 0:
@@ -713,8 +713,28 @@ class ArrayList(List):
     # E.g for [21, 32, 33, 78, 49, 51] list, 
     # the odd position iterator should iterate over 32,
     # 78 and 51 elements only.
+    class DivisibleByIterator:
+        def __init__(self, num, array, size):
+          self.num = num
+          self.array = array
+          self.size = size
+          self.ind = 0
+
+        def __next__(self):
+            while self.ind < self.size:         
+                if self.array[self.ind] % self.num == 0:
+                    temp =  self.array[self.ind]
+                    self.ind += 1
+                    return temp
+                else:
+                    self.ind += 1  
+            raise StopIteration
 
 
+    def divisible_by_iterator(self, num: int):
+        return ArrayList.DivisibleByIterator(num, self._arr, self._size)
+
+        
     class ArrayListOddPositionIterator:
         def __init__(self, array, size):
             self.array = array
@@ -1080,6 +1100,111 @@ class Queue(Collection):
         """Return the front element without removing it."""
         pass
 
+    @abstractmethod
+    def back(self) -> object:
+        """Return the back element without removing it."""
+        pass
+
+    @abstractmethod
+    def swap(v1: object, v2: object) -> None:
+        """Swaps the first occurrence of v1 in deque with the first occurrence of v2"""
+        pass
+
+   
+class Deque(Queue):
+    
+
+    def enqueue(self, e: object) -> None:
+        """Add an element to the end of the deque."""
+        pass
+
+    def dequeue(self) -> object:
+        """Remove and return the front element."""
+        pass
+
+    def front(self) -> object:
+        """Return the front element without removing it."""
+        pass
+
+    def back(self) -> object:
+        """Return the back element without removing it."""
+        pass
+
+    def swap(self, v1: object, v2: object) -> None:
+        """Swap the first occurrence of v1 with the first occurrence of v2."""
+        pass
+
+    def left_enqueue(self, e: object) -> None:
+        """Add an element to the front of the deque."""
+        pass
+
+    def right_dequeue(self) -> object:
+        """Remove and return the back element."""
+        pass
+
+class DoubleLinkedListDeque(Queue):
+    class _Node:
+        def __init__(self, data, next=None, prev=None):
+          self._data = data
+          self._next = next
+          self._prev = prev
+    
+    def __init__(self):
+      self._first = None
+      self._last = None
+      self._size = 0
+
+    class StepIterator:
+        def __init__(self, start_node : "DoubleLinkedListDeque._Node", step, size):
+            if step >= size:
+                raise ValueError  
+            self.current_node = start_node  
+            self.step = step
+            self.size = size
+
+        def __iter__(self):
+            return self
+
+        def __next__(self):
+            temp = self.current_node._data
+            i = 0
+            while i < self.step:
+                if self.current_node is None:
+                    raise StopIteration
+                self.current_node = self.current_node._next
+                i += 1
+
+            return temp
+
+    def left_enqueue(self, e: object):
+        new_node = DoubleLinkedListDeque._Node(e)
+
+        if self._size == 0:
+            self._first = self._last = new_node
+            
+        else:
+            new_node._next = self._first
+            self._first._prev = new_node
+            self._first = new_node
+        self._size += 1
+
+
+    def right_dequeue(self):
+        if self._size == 0:
+            return 
+
+        temp = self._last._data
+
+        if self._size == 1:
+            self._first = None
+            self._last = None
+        else:
+            self._last = self._last._prev
+            self._last._next = None
+            self._size -= 1
+
+        return temp
+      
 class LinkedListBasedQueue(Queue):
     class _Node:
         def __init__(self, data, next=None):
@@ -1107,9 +1232,13 @@ class LinkedListBasedQueue(Queue):
         if self._first is None or self._size == 0:
             return None
         
-        temp = self._first
+        temp = self._first._data
         self._first = self._first._next
         self._size -= 1
+
+        if self._size == 0:
+            self._last = None
+
         return temp
         
 
@@ -1137,8 +1266,6 @@ class LinkedListBasedQueue(Queue):
         return False  
 
 
-
-
     def get_first(self) -> object:
         """Return the front element without removing it."""
         return self._first
@@ -1147,6 +1274,96 @@ class LinkedListBasedQueue(Queue):
     def get_last(self) -> object:
         """Return the front element without removing it."""
         return self._last
+
+
+class ArrayDeque:
+    class StepIterator:
+        def __init__(self, step, array, size, start_index):
+            if step >= size:
+                raise ValueError
+            self.step = step
+            self.array = array
+            self.size = size
+            self.current_index = start_index
+
+        def __iter__(self):
+            return self
+
+        def __next__(self):
+            if self.size == 0:
+                raise StopIteration
+
+            temp = self.array[self.current_index]
+            self.current_index = (self.step + self.current_index) % self.size
+            return temp
+
+    def __init__(self, capacity=10):
+        self.size = 0
+        self.array = [None] * capacity
+        self.front = 0
+        self.capacity = capacity
+
+    def step_iterator(self, step):
+        self.StepIterator(step, self.capacity, self.size, self.front)
+
+    def dequeue(self) -> object:
+        # Checking whether the Deque is empty
+        if self.size == 0:
+            return
+
+        # Checking whether the Deque contains 1 element
+        if self.size == 1:
+            temp = self.array[self.front]
+            self.array[self.front] = None
+            self.front = 0
+        else:
+            temp = self.array[self.front]
+            self.array[self.front] = None
+            self.front = (self.front + 1) % self.size
+
+        self.size -= 1
+        return temp
+
+    def enqueue(self, e: object):
+        self._resize() # Checking if our array is full
+    
+        if self.size == 0: # Case 1: the array is empty
+            self.front = 0
+            self.array[self.front] = e
+        else:
+            new_index = (self.size + self.front) % self.capacity 
+            self[new_index] = e
+
+        self.size += 1
+
+    def _resize(self):
+        if self.capacity == self.size:
+            self.capacity += 10
+            new_array = [None] * self.capacity
+
+            for i in range(0, self.size): # Inserting all elements to the newly created array
+                new_array[i] = self.array[(self.front + i) % self.size]
+
+            for j in range(self.size):
+                self.array[j] = new_array[j]  
+
+            self.front = 0
+            
+
+    def duplicate_inplace(self):
+        if self.size * 2 > self.capacity: # if no size available for duplication -> resize!
+            self._resize()
+            
+        j = 0
+        while j < self.size:
+            for i in range(self.size, j, -1): # Shifting elements
+                self.array[(i + self.front) % self.capacity] = self[(i - 1 + self.front) % self.capacity]
+            # Inserting the duplicate
+            self.array[(j + 1 + self.front) % self.capacity] = self.array[(j + self.front) % self.capacity]
+            self.size += 1
+            j += 2 
+        
+       
 
 # Implement a recursive function remove_even_items(s: StackADT) -> int (not within any class
 # scope) that removes even items from a stack of integer objects and returns the count of removed items.
@@ -1313,3 +1530,393 @@ def remove_even(s: Stack):
 
     if t % 2 != 0:
         s.push(t)
+
+# 2. Create a recursive function, not within any class scope, that accepts a StackADT
+# and removes all items at odd | even positions
+def stack_even_positions_remover(s: Stack, i=1):
+    if s.is_empty():
+        return
+
+    t = s.pop()
+
+    stack_even_positions_remover(s, i + 1)
+
+    if i % 2 == 1:
+        s.push(t)
+    
+
+def stack_odd_positions_remover(s: Stack, i=0):
+    if s.is_empty():
+        return
+
+    t = s.pop()
+
+    stack_odd_positions_remover(s, i + 1)
+
+    if i % 2 == 0:
+        s.push(t)
+
+# 3. Create a recursive function, not within any class scope, that accepts a StackADT
+# and removes all items that are divisible by 5.
+def remove_divisible_by_5(s: Stack):
+    if s.is_empty():
+        return
+
+    t = s.pop()
+
+    remove_divisible_by_5(s)
+
+    if t % 5 != 0:
+        s.push(t)
+
+# Create a recursive function, not within any class scope, that accepts a StackADT
+# and returns the count of all items that are divisible by 5.
+def count_of_divisible_by_5_stack(s: Stack):
+    if s.is_empty():
+        return 0
+
+    t = s.pop()
+
+    count = count_of_divisible_by_5_stack(s)
+
+    if t % 5 == 0:
+        count += 1
+
+    s.push(t) 
+     
+    return count
+
+# Create a recursive function, not within any class scope, that takes a StackADT
+# and an object as parameters, and removes the item before that object in the StackADT.
+def remove_before_stack(s: Stack, el: object):
+    if s.is_empty():
+        return
+
+    t = s.pop()
+
+    if s.is_empty():
+        s.push(t)
+        return
+    
+    h = s.pop()
+    if h == el:
+        return
+    
+    s.push(h)
+
+    remove_before_stack(s, el)
+
+    s.push(t)
+        
+
+# Create a recursive function, not within any class scope, that takes StackADT as a
+# parameter and returns the maximum object in that stack.
+def get_maximum(s: Stack):
+    if s.is_empty():
+        return float('-inf') # returning very small number
+
+    t = s.pop()
+
+    maximum_item = max(t, get_maximum(s))
+
+    s.push(t)
+
+    return maximum_item
+
+#! Create a recursive function, not within any class scope, that accepts a
+#! StackADT and reverses its content. DONE
+def reverse_stack(s: Stack):
+    if s.is_empty():
+        return
+
+    t = s.pop()
+
+    reverse_stack()
+
+    insert_at_bottom(s, t)
+
+def insert_at_bottom(s: Stack, e):
+    if s.is_empty():
+        s.push(e)
+    else:
+        t = s.pop()
+        insert_at_bottom(s, e)
+        s.push(t)
+  
+
+# Create a recursive function, not within any class scope, that accepts two
+# sorted StackADTs and returns a new merged sorted StackADT (for example, SingleLinkedStack).
+def merge_sort_stacks(s1: Stack, s2: Stack) -> Stack:
+    if s1.is_empty() and s2.is_empty():
+        return
+
+    if s1.is_empty():
+        return
+
+    if s2.is_empty():
+        return
+
+    t1 = s1.pop()
+    t2 = s2.pop()
+    result = Stack()
+
+    if t1 > t2:
+        result.push(t1)
+        result = merge_sort_stacks(s1, s2)
+        s2.push(t2)
+    else:
+        result.push(s2)
+        result = merge_sort_stacks(s1, s2)
+        s1.push(t1)
+
+    return result
+
+
+# 1. (Easy) Create a recursive function, not within any class scope, that accepts a
+# QueueADT and reverses its content
+def reverse_queue(q: Queue):
+    if q.is_empty():
+        return
+
+    t = q.dequeue()
+    
+    reverse_queue(q)
+
+    q.enqueue(t)
+
+def remove_odd_positions_queue(q: Queue, i=0):
+    if q.is_empty():
+        return
+
+    t = q.dequeue()
+
+    remove_odd_positions_queue(q, i + 1)
+
+    if i % 2 == 0:
+        q.enqueue(t)
+
+def remove_even_positions_queue(q: Queue, i=1):
+    if q.is_empty():
+        return
+
+    t = q.dequeue()
+
+    remove_even_positions_queue(q, i + 1)
+
+    if i % 2 == 1:
+        q.enqueue(t)
+
+# Create a recursive function, not within any class scope, that accepts a
+# QueueADT and removes all items that are divisible by 5
+def remove_divisible_by_5_queue(q: Queue):
+    if q.is_empty():
+        return
+
+    t = q.dequeue()
+
+    remove_divisible_by_5_queue(q)
+
+    if t % 5 != 0:
+        q.enqueue(t)
+
+# Create a recursive function, not within any class scope, that accepts a
+# QueueADT and returns the count of all items that are divisible by 5.
+def count_of_divisible_by_5_queue(q: Queue) -> int:
+    if q.is_empty():
+        return 0
+    
+    t = q.dequeue()
+
+    count = count_of_divisible_by_5_queue(q)
+
+    if t % 5 == 0:
+        count += 1
+
+    q.enqueue(t)
+
+    return count
+
+#  Create a recursive function, not within any class scope, that takes QueueADT as
+# a parameter and returns the minimum object in that queue.
+def get_minimum_queue(q: Queue):
+    if q.is_empty():
+        return
+    
+    t = q.dequeue()
+
+    minimum_el = min(t, get_minimum_queue(q))
+
+    q.enqueue(t)
+
+    return minimum_el
+
+# Create a recursive function, not within any class scope, that takes a QueueADT
+# and an object as parameters, and removes the item before that object in the QueueADT.
+def remove_before_queue(q: Queue, el: object):
+    if q.is_empty():
+        return
+    
+    t = q.dequeue()
+
+    if q.is_empty():
+        q.enqueue(t)
+        return
+    
+    h = q.dequeue()
+
+    remove_before_queue(q, el)
+
+    if h == el:
+        return
+    else:
+        q.enqueue(t)
+        q.enqueue(h)
+
+#! Create a recursive function, not within any class scope, that accepts two
+#! QueueADTs and removes all items from the first queue that are not present in the
+#! second queue.
+def intersection_of_queues(q1: Queue, q2: Queue):
+    if q1.is_empty or q2.is_empty():
+        return
+
+    t = q1.dequeue()
+
+    intersection_of_queues(q1, q2)
+
+    # if t 
+
+#     Implement second_lowest_iterative(q: Queue)-> object and
+# second_lowest_recursive(q: Queue)-> object iterative and recursive
+# functions not in any class scope which find the second lowest element of the given
+# queue.
+def second_lowest_iterative(q: Queue)-> object:
+    if q.is_empty():
+        return None
+    
+    #! Checking if te queue contains 1 elements
+
+    
+    temp_queue = Queue()
+    min1 = float('inf')
+    min2 = float('inf')
+
+    while not q.is_empty():
+        t = q.dequeue()
+        temp_queue.enqueue(t)
+
+        if t < min1:
+            min2 = min1
+            min1 = t
+        elif min1 < t < min2:
+            min2 = t
+        
+    while not temp_queue.is_empty():
+        q.enqueue(temp_queue.dequeue())
+    
+    return min2
+
+
+def second_lowest_recurisve(q: Queue) -> object:
+    def _helper_find_min(q) -> object:
+        if q.is_empty():
+            return float('inf') 
+        
+        t = q.dequeue()
+        
+        min_of_rest = _helper_find_min(q)
+        
+        q.enqueue(t)
+
+        return min(t, min_of_rest)
+
+    def _remove_first_occurrence(q: Queue, target: object):
+        if q.is_empty():
+            return
+
+        t = q.dequeue()
+
+        if t == target:
+            return
+
+        _remove_first_occurrence(q, target)
+        q.enqueue(t)
+
+    minimum_el = _helper_find_min(q)
+
+    _remove_first_occurrence(q, minimum_el)
+
+    second_min = _helper_find_min(q)
+
+    return second_min
+
+# Implement merge_sorted_deques_iterative(d1: Deque, d2: Deque) -> Deque
+# Impement merge_sorted_deques_recursive(d1: Deque, d2: Deque) -> Deque
+#  iterative and recursive functions not in any class scope which return new merged sorted Deque
+def merge_sorted_deques_iterative(d1: Deque, d2: Deque)-> Deque:
+    if d1.is_empty() and d2.is_empty():
+        return None
+    
+    if d1.is_empty():
+        return d2
+
+    if d2.is_empty():
+        return d1
+
+    merged = Deque()
+    a = d1.dequeue()
+    b = d2.dequeue()
+
+    while a is not None and b is not None:
+        if a > b:
+            merged.enqueue(b)
+            b = d2.dequeue()
+        else:
+            merged.enqueue(a)
+            a = d1.dequeue()
+    
+    while a is not None:
+        merged.enqueue(a)
+        a = d1.dequeue()
+
+    while b is not None:
+        merged.enqueue(b)
+        b = d2.dequeue()
+
+    return merged
+
+#!Incomplete???????????
+def merged_sorted_deques_recursive(d1: Deque, d2: Deque) -> Deque:
+    def add_to_merged(merged: Deque, value):
+        merged.enqueue(value)
+
+    if d1.is_empty() and d2.is_empty():
+        return Deque()
+
+    if d1.is_empty():
+        return d2
+
+    if d2.is_empty():
+        return d1
+
+    a = d1.dequeue()
+    b = d2.dequeue()
+
+    merged = Deque()
+
+    if a is not None and b is not None:
+        if a < b:
+            add_to_merged(merged, a)  
+            merged = merged_sorted_deques_recursive(d1, d2.enqueue(b)) 
+        else:
+            add_to_merged(merged, b)            
+            merged = merged_sorted_deques_recursive(d1.enqueue(a), d2)  
+    elif a is not None:
+        
+        add_to_merged(merged, a)
+        merged = merged_sorted_deques_recursive(d1, d2)
+
+    elif b is not None:
+        add_to_merged(merged, b)  
+        merged = merged_sorted_deques_recursive(d1, d2)
+
+    return merged
