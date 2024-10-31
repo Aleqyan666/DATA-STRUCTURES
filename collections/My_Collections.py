@@ -1363,7 +1363,165 @@ class ArrayDeque:
             self.size += 1
             j += 2 
         
-       
+class SetADT(Collection):
+    pass
+
+
+class MapADT(Collection):
+    @abstractmethod
+    def put(self, key, value):
+        pass
+
+    @abstractmethod
+    def get(self, key):
+        pass
+
+    @abstractmethod
+    def key_set(self) -> SetADT:
+        pass
+
+    @abstractmethod
+    def values(self) -> List:
+        pass  
+
+class HashMap(MapADT):
+    class Entry:
+        def __init__(self, k, v):
+            self._key = k
+            self._value = v
+            self._next = None
+
+        def get_key(self):
+            return self._key
+        
+        def get_value(self):
+            return self._value
+
+    __max_hash = 26
+
+    def __init__(self):
+        super().__init__()
+        self._hash_table = [None] * self.__max_hash
+        self._size = 0
+
+    # make an assumption that we'll store string objects in our set
+    def _hash(o: str):
+        # Option 1
+        # return ord(o[0].lower()) % HashSet.__max_hash
+        # Option 2
+
+        return (ord(o[0].lower()) - 97) % HashMap.__max_hash
+
+    def put(self, key, value):
+        x = HashMap._hash(key)
+        temp = self._hash_table[x]
+        if temp is None:
+            self._hash_table[x] = HashMap.Entry(key, value)
+            self._size += 1
+            return value
+        while temp:
+            if temp._key == key:
+                old_value = temp._value
+                temp._value = value
+                return old_value
+            temp = temp._next
+        e = HashMap.Entry(key, value)
+        e._next = self._hash_table[x]
+        self._hash_table = e
+        self._size += 1
+        return value
+   
+    def get(self, key):
+        x = HashMap._hash(key)
+        temp = self._hash_table[x]
+        while temp:
+            if temp._key == key:
+                return temp._value
+            temp = temp._next
+        return None
+
+    def key_set(self) -> SetADT:
+        pass
+
+    def values(self) -> List:
+        pass
+
+    def add(self, k) -> None:
+        pass
+
+    # def remove(self, k) -> bool:
+    #     hash_index = HashMap._hash(k)
+    #     curr = self._hash_table[hash_index]
+    #     prev = None
+    #     while curr:
+    #         if curr._key == k:
+    #             if not prev:
+    #                 self._hash_table[hash_index] = self._hash_table[hash_index]._next
+    #             else:
+    #                 prev._next = curr._next
+    #             self._size -= 1
+    #             curr._next = None
+    #             return curr._value
+    #         prev = curr
+    #         curr = curr._next
+    #     return None
+
+    def remove(self, k) -> bool:
+        x = HashMap._hash(k)
+        temp = self._hash_table[x]
+        prev = None
+        while temp:
+            if temp._key == k:
+                if prev is None:
+                    self._hash_table[x] = self._hash_table[x]._next
+                else:
+                    prev._next = temp._next
+                self._size -= 1
+                return True
+            prev = temp
+            temp = temp._next
+
+        return False
+
+    class HashMapEntryIterator:
+        def __init__(self,table):
+            self._table=table
+            self._current=None
+            for i in range(0,len(self._table)):
+                if self._table[i] is not None:
+                    self._current=self._table[i]
+                    break
+
+
+        def __next__(self):
+            x=[self._current.key,self._current.value]
+            if self._current._next is not None:
+                self._current = self._current._next
+            # TODO add the case when the self._current does not have a next reference
+            return x
+
+    def __iter__(self):
+        return HashMap.HashMapEntryIterator(self._hash_table)
+
+    def contains(self, k) -> bool:
+        x = HashMap._hash(k)
+        if self._hash_table[x] is None:
+            return False
+        else:
+            return True
+
+    def clear(self) -> None:
+        self._hash_table = [None] * HashMap.__max_hash
+        self._size = 0
+
+    def print(self):
+        for i in range(len(self._hash_table)):
+            print(i, ": ", end="")
+            temp = self._hash_table[i]
+            while temp:
+                print("(", temp._key, ",", temp._value, ") ->", end="")
+                temp = temp._next
+            print()
 
 # Implement a recursive function remove_even_items(s: StackADT) -> int (not within any class
 # scope) that removes even items from a stack of integer objects and returns the count of removed items.
