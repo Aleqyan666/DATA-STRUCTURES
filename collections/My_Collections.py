@@ -1449,23 +1449,6 @@ class HashMap(MapADT):
     def add(self, k) -> None:
         pass
 
-    # def remove(self, k) -> bool:
-    #     hash_index = HashMap._hash(k)
-    #     curr = self._hash_table[hash_index]
-    #     prev = None
-    #     while curr:
-    #         if curr._key == k:
-    #             if not prev:
-    #                 self._hash_table[hash_index] = self._hash_table[hash_index]._next
-    #             else:
-    #                 prev._next = curr._next
-    #             self._size -= 1
-    #             curr._next = None
-    #             return curr._value
-    #         prev = curr
-    #         curr = curr._next
-    #     return None
-
     def remove(self, k) -> bool:
         x = HashMap._hash(k)
         temp = self._hash_table[x]
@@ -1484,21 +1467,32 @@ class HashMap(MapADT):
         return False
 
     class HashMapEntryIterator:
-        def __init__(self,table):
-            self._table=table
-            self._current=None
-            for i in range(0,len(self._table)):
+        def __init__(self, table):
+            self._table = table
+            self._index = 0
+            self._current : "HashMap.Entry" = None
+            for i in range(len(self._table)):
                 if self._table[i] is not None:
-                    self._current=self._table[i]
+                    self._current = self._table[i]
                     break
-
+                self._index += 1
 
         def __next__(self):
-            x=[self._current.key,self._current.value]
-            if self._current._next is not None:
+            if self._current is not None:
+                x = [self._current._key, self._current._value]
                 self._current = self._current._next
-            # TODO add the case when the self._current does not have a next reference
-            return x
+                return x
+
+            else:
+                self._index += 1
+                while self._index < len(self._table):
+                    if self._table[self._index] is not None:
+                        self._current = self._table[self._index]  
+                        x = [self._current._key, self._current._value]            
+                        return x
+                    self._index += 1
+                raise StopIteration
+
 
     def __iter__(self):
         return HashMap.HashMapEntryIterator(self._hash_table)
@@ -1517,11 +1511,234 @@ class HashMap(MapADT):
     def print(self):
         for i in range(len(self._hash_table)):
             print(i, ": ", end="")
-            temp = self._hash_table[i]
+            temp : "HashMap.Entry" = self._hash_table[i]
             while temp:
                 print("(", temp._key, ",", temp._value, ") ->", end="")
                 temp = temp._next
             print()
+
+class HashSet(SetADT):
+    class _Node:
+        def __init__(self, d, n=None):
+            self._data = d
+            self._next = n
+
+    __max_hash = 26
+
+    # make an assumption that we'll store string objects in our set
+    def _hash(o: str):
+        # Option 1
+        # return ord(o[0].lower()) % HashSet.__max_hash
+        # Option 2
+
+        return (ord(o[0].lower()) - 97) % HashSet.__max_hash
+
+
+    def __init__(self):
+        self._size = 0
+        self._hash_table = [None] * self.__max_hash
+
+    def __iter__(self):
+      return self.HashSetStepIterator(self._hash_table, 1)
+
+    class HashSetStepIterator:
+        def __init__(self, table, step: int):
+            if step > len(table):
+                raise ValueError
+
+            self._table = table
+            self._step = step
+            self._index = 0
+            self._current : "HashSet._Node" = None
+            for i in range(len(self._table)):
+                if self._table[i] is not None:
+                    self._current = self._table[i]
+                    break
+                self._index += 1
+
+
+        def __next__(self):
+            x = self._current._data
+            j = 0
+            while j < self._step:
+                # If next element exists, traverse to it and return the current one
+                if self._current._next:
+                    self._current = self._current._next
+                # increment the count of iterations each time we pass over a node/entry
+                    j += 1 
+                else:
+                    # finding the next non-None element
+                    self._index += 1
+                    while self._table[self._index] is None:
+                        self._index += 1 # traversing to the next bucket of the hashtable
+                        if self._index >= len(self._table):
+                            self._current = None
+                            raise StopIteration # in case we go out of bounds
+                        self._current = self._table[self._index]
+                    j += 1
+            return x
+
+        def __iter__(self):
+          return self
+    
+
+    def step_iterator(self, step: int):
+        return HashSet.HashSetStepIterator(self._hash_table, step)
+
+    def add(self, e) -> bool:
+        hash_index = HashSet._hash(e)
+        if self._hash_table[hash_index] == None:
+            self._hash_table[hash_index] = HashSet.Node(e)
+            self._size += 1
+        else:
+            temp : "HashSet._Node" = self._hash_table[hash_index]
+            prev = None
+            while temp:
+                if temp._data == e:
+                    return False
+                prev = temp
+                temp = temp._next
+            # Option 1: add from the back
+            prev._next = HashSet.Node(e)
+            # Option 2: add from the front
+            # self._hash_table[hash_index] = HashSet.Node(e, self._hash_table[hash_index])
+            self._size += 1
+        return True
+
+    def remove(self, e) -> bool:
+        hash_index = HashSet._hash(e)
+        curr = self._hash_table[hash_index]
+        prev = None
+        while curr:
+            if curr._data == e:
+                if not prev:
+                    self._hash_table[hash_index] = curr._next
+                else:
+                    prev._next = curr._next
+                self._size -= 1
+                return True
+            prev = curr
+            curr = curr._next
+        return False
+
+    def contains(self, e) -> bool:
+        hash_index = HashSet._hash(e)
+        temp = self._hash_table[hash_index]
+        while temp:
+            if temp._data == e:
+                return True
+            temp = temp._next
+        return False
+
+    def clear(self) -> None:
+        self._hash_table = [None] * self.__max_hash
+
+    def print(self):
+        for i in range(len(self._hash_table)):
+            print(i, ": ", end="")
+            temp = self._hash_table[i]
+            while temp:
+                print(temp._data, "->", end="")
+                temp = temp._next
+            print()
+
+    # removes the element after a given element 
+    # in horizontal iteration. If no such element exists None is returned.
+    def remove_after(self, el):
+        if self._size <= 1:
+            return None
+
+        x = HashSet._hash(el)
+        if self._hash_table[x] is None:
+            return None
+
+        current : "HashSet._Node" = self._hash_table[x]
+        if current._next is None:
+            return None
+        current_2  : "HashSet._Node"= current._next
+        while current:
+            if current._data == el:
+                if current_2._next is None:
+                    current._next = None
+                    self._size -= 1
+                else:
+                    current._next = current_2._next
+                    self._size -= 1
+                return
+            current = current._next
+            current_2 = current_2._next
+        
+        return None
+
+
+    # removes the element before a given element in horizontal iteration.
+    # If no such element exists None is returned.
+    def remove_before(self, el):
+        if self._size <= 1:
+            return None
+
+        x = HashSet._hash(el)
+        current : "HashSet._Node" = self._hash_table[x]
+
+        if current is None or current._data == el or current._next is None:
+            return None
+
+        if current._next._data == el:
+            self._hash_table[x] = current._next
+            self._size -= 1
+            return
+            
+        prev = current
+        current = current._next
+
+        while current._next: 
+            if current._next._data == el:
+                prev._next = current._next
+                self._size -= 1
+                return
+            else:
+                prev = current
+                current = current._next
+
+        return None
+
+
+
+
+    class HashSetHorizontalIterator:
+        def __init__(self, hash_table):
+            self._hash_table = hash_table
+            self._cur = None
+            for node in self._hash_table:
+                if node:
+                    self._cur = node
+                    break
+
+
+        def __next__(self):
+            if not self._cur:
+                raise StopIteration
+            ret = self._cur._data
+            if self._cur._next:
+                self._cur = self._cur._next
+            else:
+                hash_index = HashSet._hash(self._cur._data)
+                # Option 1 to check if we reached the end of iterations
+
+                # self._cur = None
+                for i in range(hash_index + 1, len(self._hash_table)):
+                    if self._hash_table[i]:
+                        self._cur = self._hash_table[i]
+                        break
+                # Option 2 to check if we reached the end of iterations
+                if self._cur._data == ret:
+                    self._cur = None
+
+            return ret
+
+    def __iter__(self):
+        return HashSet.HashSetHorizontalIterator(self._hash_table)
+
 
 # Implement a recursive function remove_even_items(s: StackADT) -> int (not within any class
 # scope) that removes even items from a stack of integer objects and returns the count of removed items.
@@ -1532,50 +1749,6 @@ class HashMap(MapADT):
 #   !  while not s.is_empty():
 #    !     if fin_stack[]
 
-# Odd position iterator for linkedList
-# llist = LinkedList()
-# llist.add_last(1)
-# llist.add_last(2)
-# llist.add_last(3)
-# llist.add_last(4)
-
-# iteratorlinked = LinkedList.odd_position_iterator(llist)
-# for el in iteratorlinked:
-#     print(el)
-
-# Odd position iterator for ArrayList
-# alist = ArrayList()
-# alist.add_from_back(1)
-# alist.add_from_back(2)
-# alist.add_from_back(3)
-# alist.add_from_back(4)
-
-# iterator = ArrayList.odd_position_iterator(alist)
-# for el in iterator:
-#     print(el)
-
-        
-# stack = LinkedListBasedStack() option 1
-
-# # Push some elements onto the stack
-# stack.push(1)
-# stack.push(2)
-# stack.push(3)
-
-# # Iterate through the stack using a for loop
-# for element in stack:
-#     print(element)
-
-
-# stack = LinkedListBasedStack() option 2
-
-# iterator = iter(stack)
-
-# try: 
-#     while True:
-#         print(next(iterator))
-# except StopIteration:
-#     pass
 
 # Implement a recursive function remove_even_items(s: StackADT) -> int (not within any class
 # scope) that removes even items from a stack of integer objects and returns the count of removed items.
