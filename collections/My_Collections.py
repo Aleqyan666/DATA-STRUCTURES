@@ -1466,6 +1466,407 @@ class HashMap(MapADT):
 
         return False
 
+    def remove_min(self):
+        if self._size == 0:
+            return
+
+        if self._size == 1:
+            node : "HashMap.Entry" = None
+            for i in range(self._size): # finding the first non-None element
+                if self._hash_table[i] is not None:
+                    node = self._hash_table[i]
+                    break
+            key, value = node._key, node._value
+            self._hash_table = [None] * self.__max_hash
+            self._size = 0
+            return key, value
+
+        # finding the minimum value
+        tmp : "HashMap.Entry" = None
+        for i in range(self._size): # finding the first non-None element
+            if self._hash_table[i] is not None:
+                tmp = self._hash_table[i]
+                break
+
+        min_value = float('-inf')
+        ind = 0
+        while tmp:
+            if tmp._key < min_value:
+                min_value = tmp._key
+
+            # traversing to the next non-None element
+            if tmp._next is not None:
+                tmp = tmp._next
+            else:
+                if ind >= self._size:
+                    return
+
+                for h in range(ind, self._size):
+                    if self._hash_table[h] is not None:
+                        tmp = self._hash_table[h]
+                        break
+                    ind += 1
+
+        # deleting the elements having the minimum value
+        ind = 0
+        current : 'HashMap.Entry' = None
+        for j in range(self._size): # traversing to the next non-None element
+            if self._hash_table[j] is not None:
+                current = self._hash_table[j]
+                break 
+            ind += 1
+
+        prev : 'HashMap.Entry' = None
+        while current:
+            if current._key == min_value:
+                if prev is None: 
+                    if current._next is None:
+                        self._hash_table[ind] = None
+                    else:
+                        prev = current 
+                        current = current._next
+                    self._size -= 1
+                    return current._key, current._value
+                    
+                elif current._next is None:
+                    prev._next = None # removing last element from the bucket, then finfing next non none
+                    self._size -= 1
+                    return current._key, current._value
+
+                elif self._size <= ind:
+                        return
+
+            # if the entry doesnt have value equal to minimum vaue
+            else:
+                if current._next is not None:
+                    current = current._next
+                else:
+                    for h in range(ind, self._size): 
+                        if self._hash_table[h] is not None:
+                            current = self._hash_table[h]
+                            break 
+                        ind += 1
+                    if self._size <= ind:
+                        return 
+        
+
+    def count_divisible_by_5(self) -> int:
+        if self._size == 0:
+            return 0
+
+        count, ind = 0
+        for j in range(ind, self._size):
+            if self._hash_table[j] is not None:
+                current = self._hash_table[j]
+                break
+            ind += 1 
+
+        while current:
+            if current._key % 5 == 0:
+                count += 1
+            if current._next is not None:
+                current = current._next
+            else:
+                ind += 1
+                for i in range(ind, self._size):
+                    if self._hash_table[i] is not None:
+                        current = self._hash_table[i]
+                        break
+                    ind += 1         
+                    
+        return count
+    
+    def remove_before(self, k) -> bool:
+        if self._size == 0:
+            return False
+        
+        x = HashMap._hash(k)
+        current : "HashMap.Entry" = self._hash_table[x]
+        prev = None
+        
+        if current is None or current._next is None: 
+            return False
+        
+        while current:
+            if current._key == k:
+                if prev is None:
+                    return False
+                else:
+                    prev._next = current._next
+                    self._size -= 1
+                    return True
+            prev = current
+            current = current._next
+
+        return False
+    
+    def remove_after(self, k):
+        if self._size == 0:
+            return False
+        
+        x = HashMap._hash(k)
+        current : "HashMap.Entry" = self._hash_table[x]
+        current2 : "HashMap.Entry" = current._next
+
+        if current is None or current._next is None:
+            return False
+        
+        while current and current2:
+            if current._key == k:
+                if current2._next is None:
+                    current._next = None
+                else:
+                    current._next = current2._next
+
+                self._size -= 1
+                return True
+            else:
+                current = current2
+                current2 = current2._next
+        return False
+    
+    # Given a list of objects create an instance method that removes all the
+    # entries from the HashMap which values are present in that list.
+    def remove_all(self, elements: list):
+        if self._size == 0 or len(elements) == 0:
+            return False
+        
+        ind = 0
+        prev : "HashMap.Entry" = None
+        for j in range(ind, self._size): # finding the first non-None Entry
+            if self._hash_table[j] is not None:
+                current : "HashMap.Entry" = self._hash_table[j]
+                break 
+            ind += 1 # incrementing when th bucket head is None
+        
+
+        while current:
+            if current._value in elements:
+                if prev is None:
+                    current = current._next
+                elif current._next is None:
+                    prev._next = None
+                else:
+                    prev._next = current._next
+                self._size -= 1
+
+
+            if current._next is not None:
+                current = current._next
+            else:
+                ind += 1
+                for i in range(ind, self._size):
+                    if self._hash_table[i] is not None:
+                        current = self._hash_table[i]
+                        prev = None
+                        break
+                    ind += 1
+
+                else:
+                    return 
+
+    def remove_maximum_elements(self):
+        if self._size == 0:
+            return
+
+        if self._size == 1:
+            self._hash_table = [None] * self.__max_hash
+            self._size = 0
+            return 
+
+        # finding the maximum value
+        tmp : "HashMap.Entry" = None
+        for i in range(self._size): # finding the first non-None element
+            if self._hash_table[i] is not None:
+                tmp = self._hash_table[i]
+                break
+
+        max_value = float('-inf')
+        ind = 0
+        while tmp:
+            if tmp._value > max_value:
+                max_value = tmp._value
+
+            # traversing to the next non-None element
+            if tmp._next is not None:
+                tmp = tmp._next
+            else:
+                if ind >= self._size:
+                    return
+
+                for h in range(ind, self._size):
+                    if self._hash_table[h] is not None:
+                        tmp = self._hash_table[h]
+                        break
+                    ind += 1
+
+        # deleting the elements having the maximum value
+        ind = 0
+        current : 'HashMap.Entry' = None
+        for j in range(self._size): # traversing to the next non-None element
+            if self._hash_table[j] is not None:
+                current = self._hash_table[j]
+                break 
+            ind += 1
+
+        prev = None
+        while current:
+            if current._value == max_value:
+                if prev is None: 
+                    if current._next is None:
+                        self._hash_table[ind] = None
+                    else:
+                        prev = current 
+                        current = current._next
+                    self._size -= 1
+                    # traversing to the next non-None element
+                    for j in range(ind, self._size): 
+                        if self._hash_table[j] is not None:
+                            current = self._hash_table[j]
+                            break 
+                        ind += 1
+                    if self._size <= ind:
+                        return
+                elif current._next is None:
+                    prev._next = None # removing last element from the bucket, then finfing next non none
+                    self._size -= 1
+                    for j in range(ind, self._size): 
+                        if self._hash_table[j] is not None:
+                            current = self._hash_table[j]
+                            break 
+                        ind += 1
+
+                elif self._size <= ind:
+                        return
+
+            # if the entry doesnt have value equal to maximum vaue
+            else:
+                if current._next is not None:
+                    current = current._next
+                else:
+                    for h in range(ind, self._size): 
+                        if self._hash_table[h] is not None:
+                            current = self._hash_table[h]
+                            break 
+                        ind += 1
+                    if self._size <= ind:
+                        return 
+
+
+    class HashMapEntryEvenPositionIterator:
+        def __init__(self, table):
+            self._table = table
+            self._index = 0
+            self._current : "HashMap.Entry" = None
+            for i in range(len(self._table)):
+                if self._table[i] is not None:
+                    self._current = self._table[i]
+                    break
+                self._index += 1 
+
+        def __next__(self):
+            if self._index >= len(self._table):
+                raise StopIteration
+
+            j = 0
+            x = [self._current._key, self._current._value]
+
+            while j < 2:
+                if self._current._next is not None:
+                    self._current = self._current._next
+                    j += 1
+                else:
+                    for k in range(self._index, len(self._table)):
+                        if self._table[k] is not None:
+                            self._current = self._table[k]
+                            j += 1
+                            break
+                        self._index += 1
+
+                    raise StopIteration
+
+            return x
+
+    class HashMapEntryOddPositionIterator:
+        def __init__(self, table):
+            self._table = table
+            self._index = 0
+            self._current : "HashMap.Entry" = None
+            # finding first non-None element(even position)
+            for i in range(len(self._table)):
+                if self._table[i] is not None:
+                    self._current = self._table[i]
+                    break
+                self._index += 1
+            #finding next non-None elment, which is a t odd index
+            for h in range(self._index, len(self._table)):
+                if self._table[h] is not None:
+                    self._current = self._table[h]
+                    break
+                self._index += 1
+
+        def __next__(self):
+            if self._index >= len(self._table):
+                raise StopIteration
+
+            j = 0
+            x = [self._current._key, self._current._value]
+
+            while j < 2:
+                if self._current._next is not None:
+                    self._current = self._current._next
+                    j += 1
+                else:
+                    # if self._index >= len(self._table):
+                    #     return StopIteration
+                    for i in range(self._index, len(self._table)):
+                        if self._table[i] is not None:
+                            self._current = self._table[i]
+                            j += 1
+                            break
+                        self._index += 1 
+
+                    raise StopIteration
+
+            return x
+             
+    class HashMapEntryDivisibleBy5Iterator:
+        def __init__(self, table):
+            self._table = table
+            self._index = 0
+            self._current : "HashMap.Entry" = None
+            for i in range(len(self._table)):
+                if self._table[i] is not None:
+                    self._current = self._table[i]
+                    break
+                self._index += 1
+
+        def __next__(self):
+            if self._index >= len(self._table):
+                raise StopIteration
+
+            
+
+            while self._index < len(self._table): 
+                if self._current is not None:
+                    if self._current._value % 5 == 0:
+                        x = [self._current._key, self._current._value]
+                        self._current = self._current._next
+
+                        return x
+                    else: 
+                        self._current = self._current._next
+                    
+                else:
+                    for j in range(self._index, len(self._table)):
+                        if self._table[j] is not None:
+                            self._current = self._table[j]
+                            break
+                        self._index += 1
+
+            raise StopIteration
+
+
     class HashMapEntryIterator:
         def __init__(self, table):
             self._table = table
@@ -1585,6 +1986,27 @@ class HashSet(SetADT):
     def step_iterator(self, step: int):
         return HashSet.HashSetStepIterator(self._hash_table, step)
 
+    def put(self, key, value):
+        pass
+
+    def get(self, key):
+        pass
+
+    def key_set(self) -> SetADT:
+        pass
+
+    def values(self) -> List:
+        pass
+
+    def empty(self):
+        pass
+
+    def is_empty(self):
+        return super().is_empty()
+    
+    def size(self):
+        return super().size()
+
     def add(self, e) -> bool:
         hash_index = HashSet._hash(e)
         if self._hash_table[hash_index] == None:
@@ -1641,6 +2063,50 @@ class HashSet(SetADT):
                 print(temp._data, "->", end="")
                 temp = temp._next
             print()
+
+    def remove_min(self):
+        if self._size == 0:
+            return None
+        
+        current : "HashSet._Node" = None
+        ind = 0
+        minimum = float('+inf')
+        for i in range(self._size): # finding first non_None element
+            if self._hash_table[i] is not None:
+                current = self._hash_table[i]
+                break
+            ind += 1
+
+        while current:
+            if current._data < minimum:
+                minimum = current._data
+            if current._next is not None:
+                current = current._next
+            else:
+                for j in range(ind, self._size):
+                    if self._hash_table[j] is not None:
+                        current = self._hash_table[j]
+                        break
+                    ind += 1
+                if ind >= self._size:
+                    break
+
+        x = HashSet._hash(minimum)
+        temp : 'HashSet._Node'= self._hash_table[x]
+        prev = None
+        while temp:
+            if temp._data == minimum:
+                if prev is None:
+                    self._hash_table[x] = temp._next
+                else:
+                    prev._next = temp._next
+                self._size -= 1
+                return minimum
+            else:
+                prev = temp
+                temp = temp._next
+
+               
 
     # removes the element after a given element 
     # in horizontal iteration. If no such element exists None is returned.
@@ -1701,9 +2167,41 @@ class HashSet(SetADT):
                 current = current._next
 
         return None
+        
+    def sum_of_items(self):
+        if self._size == 0:
+            return 0
+
+        sum, ind = 0
+        current : "HashSet._Node" = None
+        for i in range(self._size):
+            if self._hash_table is not None:
+                current = self._hash_table[i]
+                break
+            ind += 1
+        
+        while current:
+            sum += current._data
+            
+            if current._next is not None:
+                current = current._next
+            else:
+                for j in range(ind, self._size):
+                    if self._hash_table[j] is not None:
+                        current = self._hash_table[j]
+                        break
+                    ind += 1
+                if self._size <= ind:
+                    return sum
+
+        return sum  
 
 
+    def add_absent_items(self, s: SetADT):
+        if s.is_empty():
+            return
 
+        s.g               
 
     class HashSetHorizontalIterator:
         def __init__(self, hash_table):
@@ -1738,6 +2236,244 @@ class HashSet(SetADT):
 
     def __iter__(self):
         return HashSet.HashSetHorizontalIterator(self._hash_table)
+
+# Create a recursive function, not within any class scope, that accepts a MapADT
+# and removes all entries whose keys are divisible by 5
+def remove_key_divisible_by_5(map: HashMap):
+    if map.is_empty(): # map._size == 0
+        return
+
+    key, value = map.remove_min()
+
+    if key % 5 != 0:
+        map.put(key, value)
+    
+    remove_key_divisible_by_5(map)
+
+# Create a recursive function, not within any class scope, that accepts a MapADT
+# and returns the count of all entries whose values are divisible by 2
+def count_value_divisible_by_2(map: HashMap) -> int:
+    if map.is_empty(): # map._size == 0
+        return 0
+
+    key, value = map.remove_min()
+
+    if value % 2 == 0:
+        count = 1 + count_value_divisible_by_2(map)
+    else:
+        count = count_value_divisible_by_2(map)
+    
+    map.put(key, value)
+
+    return count
+    
+# Create a recursive function, not within any class scope, that accepts two
+# MapADTs and removes all entries from the first map whose keys are not present in the second map.  
+def remove_absent_elements(map1: HashMap, map2: HashMap):
+    if map1.is_empty() : # map1._size == 0
+        return
+
+    key, value = map1.remove_min()
+    if map2.is_empty() != 0: # map2._size != 0
+        key2, value2 = map2.remove_min()
+        if key == key2:
+            map1.put(key, value)
+        map2.put(key2, value2)
+
+    remove_absent_elements()
+
+# Create a recursive function, not within any class scope, that takes MapADT as a
+# parameter and returns the key of the entry whose value is the maximum
+def get_key_with_max_value(map: HashMap):
+    if map.is_empty(): # TODO
+        return None
+
+    key, value = map.remove_min()
+
+    max_value, final_key = max(get_key_with_max_value(map), value), 
+
+    map.put(key, value)
+
+    return max_value
+
+# Create a recursive function, not within any class scope, that accepts two
+# MapADTs and returns a new merged map
+def merge_hashmaps(map1: HashMap, map2: HashMap) -> HashMap:
+    if map1.is_empty() and map2.is_empty():
+        return None
+
+    if map2.is_empty():
+        return map1
+
+    if map1.is_empty():
+        return map2
+
+    result = HashMap()
+
+    if not map1.is_empty():
+        key, value = map1.remove_min()
+        if key not in map1.key_set():
+            result.put(key, value)
+
+    if not map2.is_empty():
+        key2, value2 = map2.remove_min()
+        if key2 not in result.key_set():
+            result.put(key2, value2)
+
+    result = merge_hashmaps(map1, map2)
+
+    map1.put(key, value)
+    map2.put(key2, value2)
+
+    return result
+
+
+# Create a recursive function, not within any class scope, that accepts a SetADT
+# and removes all items which are divisible by 5.
+def set_remove_divisible_by_5(hs: HashSet):
+    if hs.is_empty():
+        return
+    
+    el = hs.remove_min()
+
+    set_remove_divisible_by_5(hs)
+
+    if el % 5 != 0:
+        hs.add(el)
+
+# Create a recursive function, not within any class scope, that accepts a SetADT
+# and returns the count of all items which are divisible by 2.
+def set_count_divisible_by_2(hs: HashSet) -> int:
+    if hs.is_empty():
+        return
+    
+    el = hs.remove_min()
+
+    if el % 2 == 0:
+        count = 1 + set_count_divisible_by_2(hs)
+    else:
+        count = set_count_divisible_by_2(hs)
+
+    hs.add(el)
+
+    return count
+
+# Create a recursive function, not within any class scope, that accepts two
+# SetADTs and returns the new set, which is the union of these SetADTs.
+def union_of_sets(s1: HashSet, s2: HashSet) -> HashSet:
+    if s1.is_empty() and s2.is_empty():
+        return None
+
+    if s1.is_empty():
+        return s2
+
+    if s2.is_empty():
+        return s1
+    
+    result = HashSet()
+
+    if not s1.is_empty():
+        a = s1.remove_min()
+        if a not in result: # or result.values()
+            result.add(a)
+    
+    if not s2.is_empty():
+        b = s2.remove_min()
+        if b not in result: # or result.values()
+            result.add(b)
+
+    result = union_of_sets(s1, s2)
+
+    s1.add(a)
+    s2.add(b)
+
+    return result
+
+# Create a recursive function, not within any class scope, that accepts two
+# SetADTs and returns the new set, which is the intersection of these SetADTs
+def intersection_of_sets(s1: HashSet, s2: HashSet) -> HashSet:
+    if s1.is_empty() or s2.is_empty():
+        return HashSet()
+
+    intersection = HashSet()
+    if not s1.is_empty():
+        el = s1.remove_min()
+        if el in s2:
+            intersection.add(el) 
+
+    intersection = intersection_of_sets(s1, s2)
+
+    s1.add(el)
+
+    return intersection
+
+# Create a recursive function, not within any class scope, that accepts two
+# SetADTs and returns the new set, which is the difference of these SetADTs
+def difference_of_sets(s1: HashSet, s2: HashSet) -> HashSet:
+    if s1.is_empty() and s2.is_empty():
+        return HashSet()
+    
+    if s1.is_empty():
+        return s2
+
+    if s2.is_empty():
+        return s1
+    
+    difference = HashSet()
+    if not s1.is_empty():
+        a = s1.remove_min()
+        if a not in s2:
+            difference.add(a)
+
+    if not s2.is_empty():
+        b = s2.remove_min()
+        if b not in s1:
+            difference.add(b)
+
+    difference = difference_of_sets(s1, s2)
+
+    s1.add(a)
+    s2.add(b)
+
+    return difference
+
+# Create a recursive function, not within any class scope, that accepts two
+# SetADTs and checks if the first set is a subset of the second set.
+def is_subset_of(s1: HashSet, s2: HashSet) -> bool:
+    if s1.is_empty():
+        return True
+    
+    el = s1.remove_min()
+    if el not in s2:
+        return False    
+                
+    result = is_subset_of(s1, s2)
+
+    s1.add(el)
+
+    return result
+
+# Create a recursive function, not within any class scope, that accepts SetADT and
+# returns the sum of items
+def sum_items_of_set(s1: HashSet, s2: HashSet):
+    if s1.is_empty() and s2.is_empty():
+        return 0
+    
+    sum = 0
+    if not s1.is_empty():
+        a = s1.remove_min()
+        sum += a
+
+    if not s2.is_empty():
+        b = s2.remove_min()
+        sum += b
+
+    sum += sum_items_of_set(s1, s2)
+
+    s1.add(a)
+    s2.add(b)
+
+    return sum
 
 
 # Implement a recursive function remove_even_items(s: StackADT) -> int (not within any class
@@ -1889,13 +2625,13 @@ def stack_odd_positions_remover(s: Stack, i=0):
 
 # 3. Create a recursive function, not within any class scope, that accepts a StackADT
 # and removes all items that are divisible by 5.
-def remove_divisible_by_5(s: Stack):
+def stack_remove_divisible_by_5(s: Stack):
     if s.is_empty():
         return
 
     t = s.pop()
 
-    remove_divisible_by_5(s)
+    stack_remove_divisible_by_5(s)
 
     if t % 5 != 0:
         s.push(t)
@@ -2251,3 +2987,10 @@ def merged_sorted_deques_recursive(d1: Deque, d2: Deque) -> Deque:
         merged = merged_sorted_deques_recursive(d1, d2)
 
     return merged
+
+# hss = HashSet()
+# hss.add(2)
+# hss.add(5)
+# hss.add(8)
+# hss.add(11)
+# set_count_divisible_by_2(hss)

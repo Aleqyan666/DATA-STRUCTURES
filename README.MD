@@ -26,7 +26,7 @@ This repository is a comprehensive collection of data structures, algorithms, an
     - The `iterators/` package  implements the iterator design pattern, offering various iterator solutions with distinct implementations. It also includes custom exception classes to handle specific errors, enhancing error management and code clarity.
   
 - **/collections:**
-    - The `collections/` package contains implementations of common data structures such as arrays, linked lists, queues, stacks, and others. It provides    efficient and reusable solutions for data organization and manipulation, serving as the foundation for many algorithms and applications.
+    - The `collections/` package contains implementations of common data structures such as arrays, linked lists, queues, stacks, hashmaps, hashsets, trees and others. It provides efficient and reusable solutions for data organization and manipulation, serving as the foundation for many algorithms and applications.
     - 
 - **recursion:**
     - The `recursion/` package includes exercises and solutions that apply the recursive problem-solving approach. It offers a variety of recursive implementations, helping to deepen understanding of recursion through practical examples and challenges.
@@ -34,6 +34,11 @@ This repository is a comprehensive collection of data structures, algorithms, an
 - **sorting_algorithms:**
     - The `sorting_algorithms/` package contains a variety of sorting algorithm implementations. It provides exercises and solutions designed to enhance understanding of sorting techniques and their complexities, along with practical examples and challenges for hands-on practice.
 
+- **dynamic_programming:**
+    - The `dynamic_programming/` package offers various dynamic programming problems and solutions, emphasizing techniques like memoization and tabulation. It provides exercises, examples, and challenges to build problem-solving skills.
+  
+- **binary_tree:**
+    - The `binary_tree/` package contains implementations of binary tree structures and algorithms. It includes exercises and solutions to help understand tree traversal, insertion, deletion, and balancing techniques, along with practical examples for hands-on learning.
 
 
 
