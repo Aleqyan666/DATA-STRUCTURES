@@ -1364,7 +1364,21 @@ class ArrayDeque:
             j += 2 
         
 class SetADT(Collection):
-    pass
+    @abstractmethod
+    def contains(self, e) -> bool:
+        pass
+
+    @abstractmethod
+    def add(self, el) -> bool:
+        pass
+
+    @abstractmethod
+    def remove(self) -> bool:
+        pass
+
+    @abstractmethod
+    def remove_min(self) -> object:
+        pass
 
 
 class MapADT(Collection):
@@ -1403,6 +1417,9 @@ class HashMap(MapADT):
         super().__init__()
         self._hash_table = [None] * self.__max_hash
         self._size = 0
+
+    def __iter__(self):
+        return self.HashMapStepIterator(1, self._hash_table, self.__max_hash, self._size)
 
     # make an assumption that we'll store string objects in our set
     def _hash(o: str):
@@ -1472,7 +1489,7 @@ class HashMap(MapADT):
 
         if self._size == 1:
             node : "HashMap.Entry" = None
-            for i in range(self._size): # finding the first non-None element
+            for i in range(self.__max_hash): # finding the first non-None element
                 if self._hash_table[i] is not None:
                     node = self._hash_table[i]
                     break
@@ -1483,7 +1500,7 @@ class HashMap(MapADT):
 
         # finding the minimum value
         tmp : "HashMap.Entry" = None
-        for i in range(self._size): # finding the first non-None element
+        for i in range(self.__max_hash): # finding the first non-None element
             if self._hash_table[i] is not None:
                 tmp = self._hash_table[i]
                 break
@@ -1500,8 +1517,8 @@ class HashMap(MapADT):
             else:
                 if ind >= self._size:
                     return
-
-                for h in range(ind, self._size):
+                ind += 1
+                for h in range(ind, self.__max_hash):
                     if self._hash_table[h] is not None:
                         tmp = self._hash_table[h]
                         break
@@ -1510,7 +1527,7 @@ class HashMap(MapADT):
         # deleting the elements having the minimum value
         ind = 0
         current : 'HashMap.Entry' = None
-        for j in range(self._size): # traversing to the next non-None element
+        for j in range(self.__max_hash): # traversing to the next non-None element
             if self._hash_table[j] is not None:
                 current = self._hash_table[j]
                 break 
@@ -1541,7 +1558,8 @@ class HashMap(MapADT):
                 if current._next is not None:
                     current = current._next
                 else:
-                    for h in range(ind, self._size): 
+                    ind += 1
+                    for h in range(ind, self.__max_hash): 
                         if self._hash_table[h] is not None:
                             current = self._hash_table[h]
                             break 
@@ -1555,9 +1573,9 @@ class HashMap(MapADT):
             return 0
 
         count, ind = 0
-        for j in range(ind, self._size):
+        for j in range(ind, self.__max_hash):
             if self._hash_table[j] is not None:
-                current = self._hash_table[j]
+                current:'HashMap.Entry' = self._hash_table[j]
                 break
             ind += 1 
 
@@ -1568,7 +1586,7 @@ class HashMap(MapADT):
                 current = current._next
             else:
                 ind += 1
-                for i in range(ind, self._size):
+                for i in range(ind, self.__max_hash):
                     if self._hash_table[i] is not None:
                         current = self._hash_table[i]
                         break
@@ -1633,7 +1651,7 @@ class HashMap(MapADT):
         
         ind = 0
         prev : "HashMap.Entry" = None
-        for j in range(ind, self._size): # finding the first non-None Entry
+        for j in range(ind, self.__max_hash): # finding the first non-None Entry
             if self._hash_table[j] is not None:
                 current : "HashMap.Entry" = self._hash_table[j]
                 break 
@@ -1655,7 +1673,7 @@ class HashMap(MapADT):
                 current = current._next
             else:
                 ind += 1
-                for i in range(ind, self._size):
+                for i in range(ind, self.__max_hash):
                     if self._hash_table[i] is not None:
                         current = self._hash_table[i]
                         prev = None
@@ -1693,8 +1711,8 @@ class HashMap(MapADT):
             else:
                 if ind >= self._size:
                     return
-
-                for h in range(ind, self._size):
+                ind += 1
+                for h in range(ind, self.__max_hash):
                     if self._hash_table[h] is not None:
                         tmp = self._hash_table[h]
                         break
@@ -1703,7 +1721,7 @@ class HashMap(MapADT):
         # deleting the elements having the maximum value
         ind = 0
         current : 'HashMap.Entry' = None
-        for j in range(self._size): # traversing to the next non-None element
+        for j in range(self.__max_hash): # traversing to the next non-None element
             if self._hash_table[j] is not None:
                 current = self._hash_table[j]
                 break 
@@ -1720,17 +1738,19 @@ class HashMap(MapADT):
                         current = current._next
                     self._size -= 1
                     # traversing to the next non-None element
-                    for j in range(ind, self._size): 
+                    ind += 1
+                    for j in range(ind, self.__max_hash): 
                         if self._hash_table[j] is not None:
                             current = self._hash_table[j]
                             break 
                         ind += 1
-                    if self._size <= ind:
+                    if self.__max_hash <= ind:
                         return
                 elif current._next is None:
                     prev._next = None # removing last element from the bucket, then finfing next non none
                     self._size -= 1
-                    for j in range(ind, self._size): 
+                    ind += 1
+                    for j in range(ind, self.__max_hash): 
                         if self._hash_table[j] is not None:
                             current = self._hash_table[j]
                             break 
@@ -1744,7 +1764,8 @@ class HashMap(MapADT):
                 if current._next is not None:
                     current = current._next
                 else:
-                    for h in range(ind, self._size): 
+                    ind += 1
+                    for h in range(ind, self.__max_hash): 
                         if self._hash_table[h] is not None:
                             current = self._hash_table[h]
                             break 
@@ -1866,33 +1887,79 @@ class HashMap(MapADT):
 
             raise StopIteration
 
+    class HashMapStepIterator:
+        def __init__(self, step, table, max_hash, size):
+            if self._step >= size:
+                raise ValueError
+            self._step = step
+            self._hash_table = table
+            self._MAX_HASH = max_hash
+            self._index = 0
+            self._size = size
+            self._current : 'HashMap.Entry' = None
+            for i in range(self._MAX_HASH):
+                if self._hash_table[i] is not None:
+                    self._current = self._hash_table[i]
+                    break
+                self._index += 1
+
+        def __next__(self):
+            if self._current is None:
+                raise StopIteration
+
+            x = self._current._value
+
+            s = 0
+            while s < self._step and self._current:
+
+                if self._current._next:
+                    self._current = self._current._next
+                    s += 1
+                else:
+                    self._index += 1
+                    for j in range(self._index, self._MAX_HASH):
+                        if self._hash_table[j] is not None:
+                            self._current = self._hash_table[j]
+                            s += 1
+                            break
+                        self._index += 1
+                    if self._index == self._MAX_HASH:
+                        self._current = None
+
+
+            return x
 
     class HashMapEntryIterator:
-        def __init__(self, table):
+        def __init__(self, table, max_hash):
             self._table = table
+            self._MAX_HASH = max_hash
             self._index = 0
             self._current : "HashMap.Entry" = None
-            for i in range(len(self._table)):
+            for i in range(self._MAX_HASH):
                 if self._table[i] is not None:
                     self._current = self._table[i]
                     break
                 self._index += 1
 
         def __next__(self):
-            if self._current is not None:
-                x = [self._current._key, self._current._value]
+            if self._current is  None:
+                raise StopIteration
+
+            x = [self._current._key, self._current._value]
+
+            if self._current._next:
                 self._current = self._current._next
-                return x
 
             else:
                 self._index += 1
-                while self._index < len(self._table):
+                while self._index < self._MAX_HASH:
                     if self._table[self._index] is not None:
                         self._current = self._table[self._index]  
                         x = [self._current._key, self._current._value]            
-                        return x
+                        break
                     self._index += 1
-                raise StopIteration
+
+            return x
 
 
     def __iter__(self):
@@ -1943,15 +2010,17 @@ class HashSet(SetADT):
       return self.HashSetStepIterator(self._hash_table, 1)
 
     class HashSetStepIterator:
-        def __init__(self, table, step: int):
-            if step > len(table):
+        def __init__(self, table, step: int, size : int, max_hash):
+            if step > size:
                 raise ValueError
 
             self._table = table
             self._step = step
             self._index = 0
+            self._size = size
+            self._MAX_HASH = max_hash
             self._current : "HashSet._Node" = None
-            for i in range(len(self._table)):
+            for i in range(self._MAX_HASH):
                 if self._table[i] is not None:
                     self._current = self._table[i]
                     break
@@ -1959,6 +2028,9 @@ class HashSet(SetADT):
 
 
         def __next__(self):
+            if self._current is None:
+                raise StopIteration
+
             x = self._current._data
             j = 0
             while j < self._step:
@@ -1970,13 +2042,13 @@ class HashSet(SetADT):
                 else:
                     # finding the next non-None element
                     self._index += 1
-                    while self._table[self._index] is None:
-                        self._index += 1 # traversing to the next bucket of the hashtable
-                        if self._index >= len(self._table):
-                            self._current = None
-                            raise StopIteration # in case we go out of bounds
-                        self._current = self._table[self._index]
-                    j += 1
+                    for k in range(self._index, self._MAX_HASH):
+                        if self._table[k] is not None:
+                            self._current = self._table[k]
+                            j += 1
+                            break
+                        self._index += 1
+                        
             return x
 
         def __iter__(self):
@@ -2071,7 +2143,7 @@ class HashSet(SetADT):
         current : "HashSet._Node" = None
         ind = 0
         minimum = float('+inf')
-        for i in range(self._size): # finding first non_None element
+        for i in range(self.__max_hash): # finding first non_None element
             if self._hash_table[i] is not None:
                 current = self._hash_table[i]
                 break
@@ -2083,12 +2155,12 @@ class HashSet(SetADT):
             if current._next is not None:
                 current = current._next
             else:
-                for j in range(ind, self._size):
+                for j in range(ind, self.__max_hash):
                     if self._hash_table[j] is not None:
                         current = self._hash_table[j]
                         break
                     ind += 1
-                if ind >= self._size:
+                if ind >= self.__max_hash:
                     break
 
         x = HashSet._hash(minimum)
@@ -2197,11 +2269,11 @@ class HashSet(SetADT):
         return sum  
 
 
-    def add_absent_items(self, s: SetADT):
-        if s.is_empty():
-            return
+    # def add_absent_items(self, s: SetADT):
+    #     if s.is_empty():
+    #         return
 
-        s.g               
+    #     s.g               
 
     class HashSetHorizontalIterator:
         def __init__(self, hash_table):
@@ -2236,6 +2308,666 @@ class HashSet(SetADT):
 
     def __iter__(self):
         return HashSet.HashSetHorizontalIterator(self._hash_table)
+    
+
+class PriorityQueue(Queue):
+    def __init__(self):
+        self.__size = 0
+        self.__heap = [None] * 10
+
+    def ensure_capacity(self):
+        pass
+
+    def enqueue(self, e):
+        self.ensure_capacity()
+        self.__heap[self.__size] = e
+        # temp
+        # while temp:
+        #     ...
+        #     temp = temp.parent
+        i = self.__size
+        while i > 0 and self.__heap[i] < self.__heap[(i - 1) // 2]:
+            p = (i - 1) // 2
+            if self.__heap[i] < self.__heap[p]:
+                self.__heap[i], self.__heap[p] = self.__heap[p], self.__heap[i]
+            i = p
+        self.__size += 1
+
+   
+
+    def dequeue(self):
+        if self.__size == 0:
+            return None
+
+        data = self.__heap[0]
+        self.__heap[0] = self.__heap[self.__size - 1]
+        self.__heap[self.__size - 1] = None
+        self.__size -= 1
+
+        i = 0
+        while i < self.__size:
+            left = 2 * i + 1
+            right = 2 * i + 2
+            if left >= self.__size: # if the current node has 0 children we have nothing to do 
+                break
+            if left < self.__size and right < self.__size: # if the current node has 2 children
+                min = left
+                if self.__heap[left] > self.__heap[right]:
+                    min = right
+                if self.__heap[i] < self.__heap[min]:
+                    self.__heap[i], self.__heap[min] = self.__heap[min], self.__heap[i]
+                    i = min
+                else: # if no imbalance is found we have nothing to do
+                    break
+
+            else: # if the current node has 1 child
+                if self.__heap[i] > self.__heap[left]:
+                    self.__heap[left], self.__heap[i] = self.__heap[i], self.__heap[left]
+                    i = left
+                else: # if no imbalance is found we have nothing to do
+                    break
+
+        return data
+
+    def get_first(self):
+        pass
+
+    def add(self, e) -> None:
+        self.enqueue(e)
+
+    def remove(self, e) -> bool:
+        pass
+
+    def contains(self, e) -> bool:
+        pass
+
+    def clear(self) -> None:
+        pass
+
+    class PostOrderIterator:
+        def __init__(self, heap, size):
+            self.heap = heap
+            self.size = size
+            self.pointer = 0
+
+    class PreOrderIterator:
+        pass
+    class InOrderIterator:
+        pass
+
+    class OddPositionLevelOrderIterator:
+        def __init__(self, heap, size):
+            self.size = size
+            self.heap = heap
+            if self.size < 1:
+                raise ValueError
+            self.pointer = 1
+
+        def __next__(self):
+            if self.size == 0 or self.size <= self.pointer:
+                raise StopIteration
+            
+            data = self.heap[self.pointer]
+            self.pointer += 2
+
+            return data
+
+        def __iter__(self):
+            return self
+
+    def odd_position_level_order_iterator(self):
+        return self.OddPositionLevelOrderIterator(self.__heap, self.__size)
+
+    class EvenPositionLevelOrder:
+        def __init__(self, heap, size):
+            self.heap = heap
+            self.size = size
+            self.pointer = 0
+
+        def __next__(self):
+            if self.pointer >= self.size:
+                raise StopIteration
+
+            data = self.heap[self.pointer]
+            self.pointer += 2
+
+            return data
+
+        def __iter__(self):
+            return self
+
+    def even_position_level_order_iterator(self):
+        return self.EvenPositionLevelOrder(self.__heap, self.__size)
+
+    class LevelOrderIterator:
+        def __init__(self, heap, size):
+            self.heap = heap
+            self.size = size
+            self.pointer = 0
+
+        def __next__(self):
+            if self.pointer >= self.size:   
+                raise StopIteration
+
+            data = self.heap[self.pointer]
+            self.pointer += 1
+
+            return data
+
+        def __iter__(self):
+            return self
+
+    def level_order_iterator(self):
+        return self.LevelOrderIterator(self.__heap, self.__size)
+
+    def count_divisible_by_5_v2(self):
+        count = 0
+        if self.__size == 0:
+            return count
+
+        for i in range(self.__size):
+            if self.__heap[i] % 5 == 0:
+                count += 1
+
+        return count
+
+    # Create an instance method that finds the count of nodes whose values are divisible by 5.
+    def count_divisible_by_5(self):
+        return self._get_count_divisible_by_5_recursive(0)
+
+    def _get_count_divisible_by_5_recursive(self, node_index):
+        if node_index >= self.__size:
+            return 0
+
+        count = 0
+        count = self._get_count_divisible_by_5_recursive(node_index * 2 + 1)
+        count = self._get_count_divisible_by_5_recursive(node_index * 2 + 2)
+
+        if self.__heap[node_index] % 5 == 0:
+            count += 1
+
+        return count 
+
+    # Create an instance method that finds the largest value in each level.
+    def largest_in_each_level(self) -> list:
+        data = list()
+        num_of_items = 2
+        i = 1
+        data.append(self.__heap[0])
+        while i < self.__size:
+            max_el = max(self.__heap[i: i + num_of_items])
+            data.append(max_el)
+            i += num_of_items
+            num_of_items *= 2
+        #TODO
+        return data
+
+
+    def print_level_order(self):
+        print(self.__heap[:self.__size])
+
+    def _print_preorder_recursive(self, node_index):
+        if node_index >= self.__size:
+            return
+        print(self.__heap[node_index], ", ", end = "")
+        self._print_preorder_recursive(2 * node_index + 1)
+        self._print_preorder_recursive(2 * node_index + 2)
+
+    def  _get_count_of_div_by_postorder_recursive(self, node_index, num):
+        if node_index >= self.__size:
+            return
+        count = 0
+        count += self._get_count_of_div_by_postorder_recursive(2 * node_index + 1)
+        count += self._get_count_of_div_by_postorder_recursive(2 * node_index + 2)
+
+        if self.__heap[node_index] % num:
+            count += 1
+        return count
+
+    def get_count_of_div_by(self, num):
+        return self._get_count_of_div_by_postorder_recursive(0, num)
+
+    def _are_all_priorities_odd_postorder_recursive(self, node_index, num):
+        if node_index >= self.__size:
+            return True
+
+        are_all_odd_in_left_stree = self._are_all_priorities_odd_postorder_recursive(2 * node_index + 1)
+        are_all_odd_in_right_stree = self._are_all_priorities_odd_postorder_recursive(2 * node_index + 2)
+
+        if self.__heap[node_index] % 2 == 1:
+            return are_all_odd_in_left_stree and  are_all_odd_in_right_stree
+        return False
+
+    def are_all_priorities_odd(self, num):
+        return self._are_all_priorities_odd_postorder_recursive(0, num)
+
+
+
+    def print_preorder(self):
+        self._print_preorder_recursive(0)
+        print()
+
+class RedBlackTree(Collection):
+    class Node:
+        def __init__(self, data, left=None, right=None, parent=None, color="R"):
+            self.data = data
+            self.left = left
+            self.right = right
+            self.parent = parent
+            self.color = color
+
+        def __str__(self):
+            return str(vars(self))
+
+        def __repr__(self):
+            return str(self.data)
+
+        def color_black(self):
+            self.color = "B"
+
+        def color_red(self):
+            self.color = "R"
+
+        def color_double_black(self):
+            self.color = "DB"
+
+        @staticmethod
+        def is_black(node):
+            if not node:
+                return True
+            return node.color == "B"
+
+        @staticmethod
+        def is_red(node):
+            if not node:
+                return False
+            return node.color == "R"
+
+        def get_uncle(self):
+            if not self.parent or not self.parent.parent:
+                return None
+            return self.parent.parent.left if self.parent == self.parent.parent.right else self.parent.parent.right
+
+        def get_sibling(self):
+            if not self.parent:
+                return None
+            return self.parent.right if self == self.parent.left else self.parent.left
+
+        def get_near_nephew(self):
+            sibling = self.get_sibling()
+            if not sibling:
+                return None
+            if self == self.parent.left:
+                return sibling.left
+            else:
+                return sibling.right
+
+        def get_far_nephew(self):
+            sibling = self.get_sibling()
+            if not sibling:
+                return None
+            if self == self.parent.left:
+                return sibling.right
+            else:
+                return sibling.left
+
+    def __init__(self):
+        self.__root = None
+        self.__size = 0
+
+    def size(self) -> int:
+        return self.__size
+
+    def is_empty(self) -> bool:
+        return self.__size == 0
+
+    def clear(self) -> None:
+        self.__root = None
+        self.__size = 0
+
+    def __str__(self) -> str:
+        if self.__size == 0:
+            return ""
+        queue = [self.__root]
+        ret_values = []
+        while queue:
+            values = [str(node) for node in queue]
+            ret_values.append("     ".join(values))
+            next_level = []
+            for node in queue:
+                if node.left:
+                    next_level.append(node.left)
+                if node.right:
+                    next_level.append(node.right)
+            queue = next_level
+        return "\n".join(ret_values)
+
+    def right_rotate(self, y):
+        if not y or not y.left:
+            return
+        x = y.left
+        T2 = x.right
+
+        # rotate
+        x.right = y
+        y.left = T2
+
+        # update relationships
+        x.parent = y.parent
+        y.parent = x
+
+        if T2:
+            T2.parent = y
+
+        if not x.parent:
+            self.__root = x
+        elif x.parent.left == y:
+            x.parent.left = x
+        else:
+            x.parent.right = x
+
+        return x
+
+    def left_rotate(self, x):
+        if not x or not x.right:
+            return
+        y = x.right
+        T2 = y.left
+
+        # rotate
+        y.left = x
+        x.right = T2
+
+        # update relationships
+        y.parent = x.parent
+        x.parent = y
+
+        if T2:
+            T2.parent = x
+
+        if not y.parent:
+            self.__root = y
+        elif y.parent.left == x:
+            y.parent.left = y
+        else:
+            y.parent.right = y
+
+        return y
+
+    def insert(self, item) -> bool:
+        # Step 1: Execute BST insert
+        tmp, parent = self.__root, None
+        while tmp:
+            parent = tmp
+            if tmp.data > item:
+                tmp = tmp.left
+            elif tmp.data < item:
+                tmp = tmp.right
+            else:
+                return False
+        new_node = self.Node(item, parent=parent, color="R")
+        if not parent:
+            self.__root = new_node
+        elif item < parent.data:
+            parent.left = new_node
+        else:
+            parent.right = new_node
+        self.__size += 1
+
+        # Step 2: Fix insert
+        self.fix_insert(new_node)
+
+    def fix_insert(self, node):
+        if not node:
+            return
+
+        if not node.parent:
+            node.color_black()
+            return
+
+        parent = node.parent
+        if self.Node.is_black(parent):
+            return
+
+        grandparent = parent.parent
+        if not grandparent:
+            parent.color_black()
+            return
+
+        uncle = node.get_uncle()
+        # red parent, black grandparent
+        if self.Node.is_red(uncle):
+            parent.color_black()
+            uncle.color_black()
+            grandparent.color_red()
+            self.fix_insert(grandparent)
+        elif node == parent.left and parent == grandparent.left:
+            # Case 2.1: Left Left case
+            self.right_rotate(grandparent)
+            parent.color, grandparent.color = grandparent.color, parent.color
+        elif node == parent.right and parent == grandparent.left:
+            # Case 2.2: Left Right Case
+            self.left_rotate(parent)
+            self.right_rotate(grandparent)
+            node.color, grandparent.color = grandparent.color, node.color
+        elif node == parent.right and parent == grandparent.right:
+            # Case 2.3: Right Right case
+            self.left_rotate(grandparent)
+            parent.color, grandparent.color = grandparent.color, parent.color
+        elif node == parent.left and parent == grandparent.right:
+            # Case 2.4: Right Left Case
+            self.right_rotate(parent)
+            self.left_rotate(grandparent)
+            node.color, grandparent.color = grandparent.color, node.color
+
+    def add(self, item):
+        pass
+
+    def has(self, item):
+        pass
+
+    def remove(self, item: object) -> bool:
+        # Step 1: Execute BST remove operation
+        tmp = self.__root
+        while tmp:
+            if tmp.data == item:
+                break
+            elif tmp.data > item:
+                tmp = tmp.left
+            else:
+                tmp = tmp.right
+        # if the given item is not in our Rd Black Tree
+        if not tmp:
+            return False
+
+        # if tmp has 2 child nodes
+        if tmp.left and tmp.right:
+            repl_node = tmp.left
+            while repl_node and repl_node.right:
+                repl_node = repl_node.right
+            tmp.data, repl_node.data = repl_node.data, tmp.data
+            tmp = repl_node
+
+        # here we have either left child or right child
+        repl_node = tmp.left if tmp.left else tmp.right
+
+        # fix delete
+        if self.Node.is_black(tmp):
+            if self.Node.is_red(repl_node):
+                repl_node.color_black()
+            else:
+                tmp.color_double_black()
+                self.fix_delete(tmp)
+        # delete node from the RB Tree
+        if not tmp.parent:
+            # tmp is the root node
+            self.__root = repl_node
+        elif tmp.parent.left == tmp:
+            tmp.parent.left = repl_node
+        else:
+            tmp.parent.right = repl_node
+
+        if repl_node:
+            repl_node.parent = tmp.parent
+        self.__size -= 1
+        return True
+
+    def fix_delete(self, node):
+        if not node:
+            return
+
+        # Case 1: if node is the root node
+        if not node.parent:
+            node.color_black()
+            return
+
+        s = node.get_sibling()
+        nn = node.get_near_nephew()
+        fn = node.get_far_nephew()
+        p = node.parent
+        if self.Node.is_black(s) and self.Node.is_black(nn) and \
+                self.Node.is_black(fn) and self.Node.is_red(p):
+            # Case 2.1: if s is black, nn and fn are black, parent is red
+            s.color_red()
+            node.color_black()
+            p.color_black()
+        elif self.Node.is_black(s) and self.Node.is_black(nn) and \
+                self.Node.is_black(fn) and self.Node.is_black(p):
+            # Case 2.1: if s is black, nn and fn are black, parent is black
+            s.color_red()
+            node.color_black()
+            p.color_double_black()
+            self.fix_delete(p)
+        elif self.Node.is_red(s):
+            # Case 3: sibling is red
+            p.color, s.color = s.color, p.color
+            if node == p.left:
+                self.left_rotate(p)
+            else:
+                self.right_rotate(p)
+            self.fix_delete(node)
+        elif self.Node.is_black(s) and self.Node.is_red(nn) and \
+                self.Node.is_black(fn):
+            # Case 4: sibling is black, fn is black and nn is red
+            nn.color, s.color = s.color, nn.color
+            if node == p.left:
+                self.right_rotate(p)
+            else:
+                self.left_rotate(p)
+            self.fix_delete(node)
+        elif self.Node.is_black(s) and self.Node.is_red(fn):
+            # Case 5: sibling is black and fn is red
+            p.color, s.color = s.color, p.color
+            if node == p.left:
+                self.left_rotate(p)
+            else:
+                self.right_rotate(p)
+            fn.color_black()
+            node.color_black()
+
+
+
+#  Create a recursive function, not within any class scope, that accepts a SetADT
+# and removes all items which are divisible by 5. (use remove_min method here)
+def set_remove_divisible_by_5(s: SetADT):
+    if s.is_empty():
+        return
+
+    el = s.remove_min()
+
+    if s % 5 != 0:
+        s.add(el)
+    
+    set_remove_divisible_by_5(s)
+
+# Create a recursive function, not within any class scope, that accepts a SetADT
+# and returns the count of all items which are divisible by 2. (use remove_min methodhere)
+def set_count_divisible_by_2(s: SetADT):
+    if s.is_empty():
+        return 0
+
+    el = s.remove_min()
+
+    if el % 2 == 0:
+        count = set_count_divisible_by_2(s) + 1
+    else:
+        count = set_count_divisible_by_2(s)
+
+    s.add(el)
+
+    return count
+   
+# Create a recursive function, not within any class scope, that accepts two
+# SetADTs and returns the new set, which is the intersection of these SetADTs (for example, HashSet).
+def set_get_intersection(s1: SetADT, s2: SetADT):
+    if s1.is_empty:
+        return s1.clone()
+
+    el = s1.remove_min()
+
+    intersection = set_get_intersection(s1, s2)
+
+    if s2.contains(el):
+        intersection.add(el)
+
+    s1.add(el)
+
+    return intersection 
+
+
+# Create a recursive function, not within any class scope, that accepts two
+# SetADTs and returns the new set, which is the union of these SetADTs (for example, HashSet).
+def set_get_union(s1: SetADT, s2: SetADT):
+    if s1.is_empty():
+        return s2.clone()
+
+    a = s1.remove_min()
+    union = set_get_union(s1, s2)
+
+    if not union.contains(a):
+        union.add(a)
+
+    s1.add(a)
+
+    return union
+
+# Create a recursive function, not within any class scope, that accepts two
+# SetADTs and returns the new set, which is the difference of these SetADTs (for example, HashSet).
+def set_get_difference(s1: SetADT, s2: SetADT):
+    if s1.is_empty():
+        return HashSet
+    
+    el = s1.remove_min()
+    
+    difference = difference_of_sets(s1, s2)
+
+    if not s2.contains(el):
+        difference.add(el)
+
+    s1.add(el)
+
+    return difference
+
+# Create a recursive function, not within any class scope, that accepts SetADT and
+# returns the sum of items.
+def set_sum_of_items(s1: SetADT, s2: SetADT):
+    if s1.is_empty():
+        return 0
+    
+    if s2.is_empty():
+        return 0
+    
+    a = s1.remove_min()
+    b = s2.remove_min()
+
+    sum = set_sum_of_items(s1, s2)
+
+    sum += (a + b)
+
+    s1.add(a)
+    s2.add(b)
+
+    return sum
 
 # Create a recursive function, not within any class scope, that accepts a MapADT
 # and removes all entries whose keys are divisible by 5
@@ -2460,13 +3192,9 @@ def sum_items_of_set(s1: HashSet, s2: HashSet):
         return 0
     
     sum = 0
-    if not s1.is_empty():
-        a = s1.remove_min()
-        sum += a
+    a = s1.remove_min()
+    b = s2.remove_min()
 
-    if not s2.is_empty():
-        b = s2.remove_min()
-        sum += b
 
     sum += sum_items_of_set(s1, s2)
 
