@@ -9,7 +9,7 @@ class BST:
             self._left = None
             self._right = None
             self._parent = None
-
+            
         def height(self):
             if not self._right and not self._left:
                 return 0
@@ -43,8 +43,23 @@ class BST:
 
         return False
 
-          
+    # class LevelOrderIterator:
+    #     def __init__(self, node, size):
+    #         self.node : "BST.Node" = node 
+    #         self.level = 0
+    #         self.pointer = 0
+    #         self.size = size
+
+    #     def __next__(self):
+    #         if self.pointer >= self.size:
+    #             raise StopIteration
+
+    #         if self.pointer == 0:
+    #             self.pointer += 1 
+    #             return self.node._data
     
+
+
     def _get_largest_node(self, node):
         if not node:
             return None
@@ -391,7 +406,213 @@ class BST:
 
         return min(lmin, rmin)
     
+    def get_size_recursive(self, node: "BST.Node"):
+        if node is None:
+            return 0
+        
+        left = self.get_size_recursive(node._left)
+        right = self.get_size_recursive(node._right)
     
+        return 1 + left + right
+    
+    def get_height_recursive(self, node: "BST.Node"):
+        if node is None:
+            return -1
+        
+        left = self.get_height_recursive(node._left)
+        right = self.get_height_recursive(node._right)
+
+        return 1 + max(left, right)
+    
+    # Create a recursive instance method that returns the size of the largest Binary
+    # Search Tree subtree
+    def size_of_largest_subtree(self, node: "BST.Node"):
+        if node is None:
+           return 0
+       
+        left = self.size_of_largest_subtree(node._left)
+        right = self.size_of_largest_subtree(node._right)
+
+        current_size = left + 1 + right
+
+        return max(left, current_size, right)
+    
+    def mirror_tree(self, node: "BST.Node"):
+        if node is None:
+            return None
+        
+        node._left, node._right = node._right, node._left
+
+        self.mirror_tree(node._left)
+        self.mirror_tree(node._right)
+
+        return node
+    
+    
+    
+    
+class TreeMap:
+    def __init__(self):
+        self.__size = 0
+        self.__root = None
+
+    class Node:
+        def __init__(self, key, value):
+            self._key = key
+            self._value = value
+            self._left = None
+            self._right = None
+            self._parent = None
+
+        def height(self):
+            lh = self._left.height() if self._left else -1
+            rh = self._right.height() if self._right else -1
+            return 1 + max(lh, rh)
+
+    def put(self, key, value):
+        if self.__root is None:
+            self.__root = TreeMap.Node(key, value)
+            self.__size += 1
+            return None
+
+        temp = self.__root
+        while temp:
+            if key == temp._key:
+                old_value = temp._value
+                temp._value = value
+                return old_value
+            elif key < temp._key:
+                if temp._left:
+                    temp = temp._left
+                else:
+                    temp._left = TreeMap.Node(key, value)
+                    temp._left._parent = temp
+                    self.__size += 1
+                    return None
+            else:
+                if temp._right:
+                    temp = temp._right
+                else:
+                    temp._right = TreeMap.Node(key, value)
+                    temp._right._parent = temp
+                    self.__size += 1
+                    return None
+
+    def get(self, key):
+        temp = self.__root
+        while temp:
+            if key == temp._key:
+                return temp._value
+            elif key < temp._key:
+                temp = temp._left
+            else:
+                temp = temp._right
+        return None
+
+    def remove(self, key):
+        temp = self.__root
+        while temp:
+            if key == temp._key:
+                # Case 1: No children
+                if not temp._left and not temp._right:
+                    self.__replace_node(temp, None)
+                # Case 2: Two children
+                elif temp._left and temp._right:
+                    successor = self.__get_min(temp._right)
+                    temp._key, temp._value = successor._key, successor._value
+                    self.__replace_node(successor, successor._right)
+                # Case 3: One child
+                else:
+                    child = temp._left if temp._left else temp._right
+                    self.__replace_node(temp, child)
+                self.__size -= 1
+                return True
+            elif key < temp._key:
+                temp = temp._left
+            else:
+                temp = temp._right
+        return False
+
+    def __replace_node(self, node, replacement):
+        parent = node._parent
+        if replacement:
+            replacement._parent = parent
+        if not parent:
+            self.__root = replacement
+        elif parent._left == node:
+            parent._left = replacement
+        else:
+            parent._right = replacement
+
+    def __get_min(self, node):
+        while node and node._left:
+            node = node._left
+        return node
+
+    def __get_max(self, node):
+        while node and node._right:
+            node = node._right
+        return node
+
+    def size(self):
+        return self.__size
+
+    def contains_key(self, key):
+        return self.get(key) is not None
+
+    def height(self):
+        return self.__root.height() if self.__root else -1
+
+    def keys(self):
+        result = []
+        self.__inorder_traversal(self.__root, lambda node: result.append(node._key))
+        return result
+
+    def values(self):
+        result = []
+        self.__inorder_traversal(self.__root, lambda node: result.append(node._value))
+        return result
+
+    def __inorder_traversal(self, node, visit):
+        if not node:
+            return
+        self.__inorder_traversal(node._left, visit)
+        visit(node)
+        self.__inorder_traversal(node._right, visit)
+
+        # TreeMap: Create a recursive instance method that calculates the sum of the keys.
+    def treemap_sum_of_keys_recursive(self, node: "TreeMap.Node"):
+        if node is None:
+            return 0
+        
+        left_key_sum = self.treemap_sum_of_keys_recursive(node._left) # left_tree_sum 
+        right_key_sum = self.treemap_sum_of_keys_recursive(node._right)# right_tree_sum
+
+        return left_key_sum + node._key + right_key_sum
+    
+    def find_maximum_key(self, node: "TreeMap.Node"):
+        if node is None:
+            return float('-inf')
+        
+        left = self.find_maximum_key(node._left)
+        right = self.find_maximum_key(node._right)
+
+        return max(left, node._key, right)
+    
+    def find_minimum_key(self, node: "TreeMap.Node"):
+        if node is None:
+            return float("inf")
+        
+        left = self.find_minimum_key(node._left)
+        right = self.find_minimum_key(node._right)
+
+        return max(left, node._key, right)
+    
+    
+
+        
+
+
 
 bst = BST()
 bst.add(10)
